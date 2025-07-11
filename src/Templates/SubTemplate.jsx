@@ -115,8 +115,6 @@ const SubSlider = () => {
     );
 };
 const SubTemplate = ({ children, pageTitle, titleQuery }) => {
-    console.log(pageTitle)
-    console.log(titleQuery)
     return (
         <>
             <Flex direction={"column"} align={"center"}>

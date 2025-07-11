@@ -14,7 +14,7 @@ import { MainCard } from "./MainCard";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import serverUrl, { serverUrlV2 } from "../Constants/Constants";
+import { serverUrlV2 } from "../Constants/Constants";
 export const PostLists = () => {
   const [mainPostsdata, setMainPostsdata] = useState([]);
   const navigate = useNavigate();
@@ -52,11 +52,11 @@ export const PostLists = () => {
             </Flex>
           </Flex>
         </CardHeader>
-        <Image
+        {/* <Image
           objectFit="cover"
-          src={`${serverUrl}:8080/thumbnail/5_thumb.jpg`}
+          src={""}
           alt="Chakra UI"
-        />
+        /> */}
 
         <CardFooter
           justify="center"

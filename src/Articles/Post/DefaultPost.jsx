@@ -27,6 +27,44 @@ import MDEditor from "@uiw/react-md-editor";
 import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
 import CommentContainer from "../../Components/Comments";
 
+// Markdown 파일을 렌더링하는 컴포넌트
+const MarkdownRenderer = ({ fileUrl }) => {
+  const [markdownContent, setMarkdownContent] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMarkdown = async () => {
+      try {
+        const response = await fetch(fileUrl);
+        const text = await response.text();
+        setMarkdownContent(text);
+      } catch (error) {
+        console.error("Markdown 파일을 불러오는데 실패했습니다:", error);
+        setMarkdownContent("파일을 불러올 수 없습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMarkdown();
+  }, [fileUrl]);
+
+  if (isLoading) {
+    return <Text>로딩 중...</Text>;
+  }
+
+  return (
+    <MDEditor.Markdown
+      source={markdownContent}
+      style={{
+        whiteSpace: "pre-wrap",
+        backgroundColor: "white",
+        color: "black",
+      }}
+    />
+  );
+};
+
 const DefaultPost = () => {
   const { id } = useParams();
   const [writePost, setWritePost] = useState({
@@ -112,9 +150,9 @@ const DefaultPost = () => {
     }
   }, [id, writePost.tag]);
 
-  // tag가 4(마크다운글)일 때 파일 및 마크다운 내용 가져오기
+  // tag가 3(MD파일)일 때 파일 및 마크다운 내용 가져오기
   useEffect(() => {
-    if (writePost.tag === 4) {
+    if (writePost.tag === 3) {
       const fetchData = async () => {
         try {
           const response = await axios.get(
@@ -125,8 +163,14 @@ const DefaultPost = () => {
           // 여러 파일이 있을 경우, 첫 번째 파일만 마크다운으로 표시 (필요시 로직 수정)
           if (response.data.length > 0) {
             const file = response.data[0];
-            const text = await fetch(`${serverUrl}${file.filePath}`).then((res) => res.text());
-            setMarkdown(text);
+            if (file.filePath) {
+              try {
+                const text = await fetch(`${serverUrl}${file.filePath}`).then((res) => res.text());
+                setMarkdown(text);
+              } catch (error) {
+                console.error("파일 경로에서 MD 내용을 가져오는데 실패:", error);
+              }
+            }
           }
         } catch (error) {
           console.error(error);
@@ -147,6 +191,8 @@ const DefaultPost = () => {
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
       return { type: 'image', icon: null };
+    } else if (['md', 'markdown'].includes(extension)) {
+      return { type: 'markdown', icon: null };
     } else if (['pdf'].includes(extension)) {
       return { type: 'pdf', icon: <DownloadIcon /> };
     } else if (['doc', 'docx'].includes(extension)) {
@@ -200,82 +246,175 @@ const DefaultPost = () => {
         </HStack>
         <Card>
           <CardBody>
-            {writePost.tag === 4 ? (
-              <MDEditor.Markdown
-                source={markdown}
-                style={{
-                  whiteSpace: "pre-wrap",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-              />
+            {/* MD 파일이 있는 경우 content는 표시하지 않음 */}
+            {writePost.fileUrls && writePost.fileUrls.length > 0 &&
+              writePost.fileUrls.filter(fileUrl => {
+                const fileInfo = getFileDisplayInfo(fileUrl);
+                return fileInfo.type === 'markdown';
+              }).length > 0 ? (
+              // MD 파일이 있으면 content 대신 MD 파일들만 표시
+              writePost.fileUrls
+                .filter(fileUrl => {
+                  const fileInfo = getFileDisplayInfo(fileUrl);
+                  return fileInfo.type === 'markdown';
+                })
+                .map((fileUrl, index) => (
+                  <Box key={`md-${index}`}>
+                    <MarkdownRenderer fileUrl={fileUrl} />
+                  </Box>
+                ))
             ) : (
-              <div
-                style={{
-                  whiteSpace: "pre-wrap",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-              >
-                {writePost.content}
-              </div>
+              // MD 파일이 없으면 기존 content 표시
+              <>
+                {writePost.tag === 3 ? (
+                  <MDEditor.Markdown
+                    source={markdown}
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      backgroundColor: "white",
+                      color: "black",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      backgroundColor: "white",
+                      color: "black",
+                    }}
+                  >
+                    {writePost.content}
+                  </div>
+                )}
+
+                {/* 기존 이미지들 표시 */}
+                {images.map((image, index) => (
+                  <Image key={index} src={image.url} alt={image.id} />
+                ))}
+              </>
             )}
 
-            {/* 기존 이미지들 표시 */}
-            {images.map((image, index) => (
-              <Image key={index} src={image.url} alt={image.id} />
-            ))}
+            {/* MD 파일이 아닌 첨부 파일들만 표시 */}
+            {writePost.fileUrls && writePost.fileUrls.length > 0 &&
+              writePost.fileUrls.filter(fileUrl => {
+                const fileInfo = getFileDisplayInfo(fileUrl);
+                return fileInfo.type !== 'markdown';
+              }).length > 0 && (
+                <Box mt={4}>
+                  <Text fontSize="lg" fontWeight="bold" mb={3}>
+                    첨부 파일
+                  </Text>
+                  <VStack spacing={2} align="stretch">
+                    {writePost.fileUrls
+                      .filter(fileUrl => {
+                        const fileInfo = getFileDisplayInfo(fileUrl);
+                        return fileInfo.type !== 'markdown';
+                      })
+                      .map((fileUrl, index) => {
+                        const fileInfo = getFileDisplayInfo(fileUrl);
+                        const fileName = fileUrl.split('/').pop();
 
-            {/* 새로운 파일 URL들 표시 */}
-            {writePost.fileUrls && writePost.fileUrls.length > 0 && (
-              <Box mt={4}>
-                <Text fontSize="lg" fontWeight="bold" mb={3}>
-                  첨부 파일
-                </Text>
-                <VStack spacing={2} align="stretch">
-                  {writePost.fileUrls.map((fileUrl, index) => {
-                    const fileInfo = getFileDisplayInfo(fileUrl);
-                    const fileName = fileUrl.split('/').pop();
+                        return (
+                          <Box key={index} p={3} border="1px" borderColor="gray.200" borderRadius="md">
+                            {fileInfo.type === 'image' ? (
+                              <VStack spacing={2}>
+                                <Text fontWeight="medium">{fileName}</Text>
+                                <Image
+                                  src={fileUrl}
+                                  alt={fileName}
+                                  maxH="400px"
+                                  objectFit="contain"
+                                  borderRadius="md"
+                                />
+                                <Link href={fileUrl} isExternal color="blue.500">
+                                  <HStack>
+                                    <ExternalLinkIcon />
+                                    <Text>원본 보기</Text>
+                                  </HStack>
+                                </Link>
+                              </VStack>
+                            ) : (
+                              <HStack justify="space-between">
+                                <HStack>
+                                  {fileInfo.icon}
+                                  <Text fontWeight="medium">{fileName}</Text>
+                                </HStack>
+                                <Link href={fileUrl} isExternal color="blue.500">
+                                  <HStack>
+                                    <DownloadIcon />
+                                    <Text>다운로드</Text>
+                                  </HStack>
+                                </Link>
+                              </HStack>
+                            )}
+                          </Box>
+                        );
+                      })}
+                  </VStack>
+                </Box>
+              )
+            }
 
-                    return (
-                      <Box key={index} p={3} border="1px" borderColor="gray.200" borderRadius="md">
-                        {fileInfo.type === 'image' ? (
-                          <VStack spacing={2}>
-                            <Text fontWeight="medium">{fileName}</Text>
-                            <Image
-                              src={fileUrl}
-                              alt={fileName}
-                              maxH="400px"
-                              objectFit="contain"
-                              borderRadius="md"
-                            />
-                            <Link href={fileUrl} isExternal color="blue.500">
-                              <HStack>
-                                <ExternalLinkIcon />
-                                <Text>원본 보기</Text>
+            {/* MD 파일이 아닌 첨부 파일들만 표시 */}
+            {writePost.fileUrls && writePost.fileUrls.length > 0 &&
+              writePost.fileUrls.filter(fileUrl => {
+                const fileInfo = getFileDisplayInfo(fileUrl);
+                return fileInfo.type !== 'markdown';
+              }).length > 0 && (
+                <Box mt={4}>
+                  <Text fontSize="lg" fontWeight="bold" mb={3}>
+                    첨부 파일
+                  </Text>
+                  <VStack spacing={2} align="stretch">
+                    {writePost.fileUrls
+                      .filter(fileUrl => {
+                        const fileInfo = getFileDisplayInfo(fileUrl);
+                        return fileInfo.type !== 'markdown';
+                      })
+                      .map((fileUrl, index) => {
+                        const fileInfo = getFileDisplayInfo(fileUrl);
+                        const fileName = fileUrl.split('/').pop();
+
+                        return (
+                          <Box key={index} p={3} border="1px" borderColor="gray.200" borderRadius="md">
+                            {fileInfo.type === 'image' ? (
+                              <VStack spacing={2}>
+                                <Text fontWeight="medium">{fileName}</Text>
+                                <Image
+                                  src={fileUrl}
+                                  alt={fileName}
+                                  maxH="400px"
+                                  objectFit="contain"
+                                  borderRadius="md"
+                                />
+                                <Link href={fileUrl} isExternal color="blue.500">
+                                  <HStack>
+                                    <ExternalLinkIcon />
+                                    <Text>원본 보기</Text>
+                                  </HStack>
+                                </Link>
+                              </VStack>
+                            ) : (
+                              <HStack justify="space-between">
+                                <HStack>
+                                  {fileInfo.icon}
+                                  <Text fontWeight="medium">{fileName}</Text>
+                                </HStack>
+                                <Link href={fileUrl} isExternal color="blue.500">
+                                  <HStack>
+                                    <DownloadIcon />
+                                    <Text>다운로드</Text>
+                                  </HStack>
+                                </Link>
                               </HStack>
-                            </Link>
-                          </VStack>
-                        ) : (
-                          <HStack justify="space-between">
-                            <HStack>
-                              {fileInfo.icon}
-                              <Text fontWeight="medium">{fileName}</Text>
-                            </HStack>
-                            <Link href={fileUrl} isExternal color="blue.500">
-                              <HStack>
-                                <DownloadIcon />
-                                <Text>다운로드</Text>
-                              </HStack>
-                            </Link>
-                          </HStack>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </VStack>
-              </Box>
-            )}
+                            )}
+                          </Box>
+                        );
+                      })}
+                  </VStack>
+                </Box>
+              )
+            }
           </CardBody>
         </Card>
         <CommentContainer

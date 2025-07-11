@@ -194,6 +194,7 @@ function UpdatePostPage() {
           content: formData.content,
           thumbnail: formData.thumbnail,
           tag: writePost.tag,
+          fileUrls: writePost.fileUrls,
         })
         .then((res) => {
           setFormData({
@@ -201,6 +202,7 @@ function UpdatePostPage() {
             contentTitle: "",
             content: "",
             thumbnail: "",
+            fileUrls: [],
           });
           if (res?.data) {
             toast({
@@ -272,7 +274,7 @@ function UpdatePostPage() {
         <TabList>
           <Tab>글</Tab>
           <Tab>그림</Tab>
-          <Tab>플레이리스트</Tab>
+          <Tab>MD 파일</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>

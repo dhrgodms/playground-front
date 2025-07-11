@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import axios from "axios";
 import {
@@ -13,18 +13,56 @@ import {
 import { ArrowUpIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
-export default function MarkdownForm({ tag }) {
+export default function MarkdownForm({ tag, postValue }) {
   const toast = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     user_id: 1,
-    content_title: "",
-    content: "내용!",
-    thumbnail: "",
-    // tag : 1=글, 2=그림, 3=플레이리스트
-    tag: 1
+    content_title: postValue ? postValue.contentTitle : "",
+    content: postValue ? postValue.content : "내용!",
+    thumbnail: postValue ? postValue.thumbnail : "",
+    // tag : 1=글, 2=그림, 3=MD파일
+    tag: 3
   });
-  const [value, setValue] = React.useState("**Hello world!!!**");
+
+  // postValue가 변경될 때 formData 업데이트
+  useEffect(() => {
+    if (postValue) {
+      setFormData({
+        user_id: 1,
+        content_title: postValue.contentTitle || "",
+        content: postValue.content || "내용!",
+        thumbnail: postValue.thumbnail || "",
+        tag: 3
+      });
+    }
+  }, [postValue]);
+  const [value, setValue] = React.useState(postValue ? "**로딩 중...**" : "**Hello world!!!**");
+
+  // 기존 MD 파일 내용을 가져오는 useEffect
+  useEffect(() => {
+    if (postValue && postValue.fileUrls && postValue.fileUrls.length > 0) {
+      const fetchMarkdownContent = async () => {
+        try {
+          // MD 파일 찾기
+          const mdFile = postValue.fileUrls.find(url =>
+            url.toLowerCase().endsWith('.md') || url.toLowerCase().endsWith('.markdown')
+          );
+
+          if (mdFile) {
+            const response = await fetch(mdFile);
+            const text = await response.text();
+            setValue(text);
+          }
+        } catch (error) {
+          console.error("MD 파일을 불러오는데 실패했습니다:", error);
+          setValue("**파일을 불러올 수 없습니다.**");
+        }
+      };
+
+      fetchMarkdownContent();
+    }
+  }, [postValue]);
 
   function handleInputChange(event) {
     const { name, value } = event.target;
@@ -110,14 +148,60 @@ export default function MarkdownForm({ tag }) {
       );
       const fileUrl = uploadRes.data; // S3 URL
 
-      // 4. 게시글 등록 (content에 S3 URL 저장)
-      const res = await axios.post(`${serverUrlV2}/post`, {
-        contentTitle: formData.content_title,
-        content: fileUrl,
-        thumbnail: formData.thumbnail,
-        tag: tag,
-        fileUrls: fileUrl,
-      });
+      // 4. 게시글 등록 또는 수정
+      if (postValue && postValue.id) {
+        // 수정 모드
+        const res = await axios.put(`${serverUrlV2}/posts/${postValue.id}`, {
+          id: postValue.id,
+          contentTitle: formData.content_title,
+          content: fileUrl,
+          thumbnail: formData.thumbnail,
+          tag: 3, // MD 파일 태그
+          fileUrls: [fileUrl],
+        });
+
+        if (res?.data) {
+          toast({
+            title: `수정 완료`,
+            status: "success",
+            isClosable: true,
+          });
+          // 수정 후 해당 게시글 페이지로 이동
+          setTimeout(() => {
+            navigate(`/post/${postValue.id}`);
+          }, 1000);
+        } else {
+          toast({
+            title: `수정 실패`,
+            status: "error",
+            isClosable: true,
+          });
+        }
+      } else {
+        // 새 게시글 작성 모드
+        const res = await axios.post(`${serverUrlV2}/posts`, {
+          contentTitle: formData.content_title,
+          content: fileUrl,
+          thumbnail: formData.thumbnail,
+          tag: 3, // MD 파일 태그
+          fileUrls: [fileUrl],
+        });
+
+        if (res?.data) {
+          toast({
+            title: `업로드 완료`,
+            status: "success",
+            isClosable: true,
+          });
+          navigate("/");
+        } else {
+          toast({
+            title: `업로드 실패`,
+            status: "error",
+            isClosable: true,
+          });
+        }
+      }
 
       setFormData({
         user_id: "",
@@ -125,23 +209,13 @@ export default function MarkdownForm({ tag }) {
         content: "",
         thumbnail: "",
       });
-
-      if (res?.data) {
-        toast({
-          title: `업로드 됐나바`,
-          status: "success",
-          isClosable: true,
-        });
-        navigate("/");
-      } else {
-        toast({
-          title: `업실`,
-          status: "error",
-          isClosable: true,
-        });
-      }
     } catch (e) {
       console.error(e);
+      toast({
+        title: `오류가 발생했습니다`,
+        status: "error",
+        isClosable: true,
+      });
     }
   }
 
@@ -159,7 +233,7 @@ export default function MarkdownForm({ tag }) {
               placeholder="..OㅅO.."
               onChange={handleInputChange}
               name="content_title"
-              value={formData && formData.content_title}
+              value={formData.content_title}
             />
           </FormControl>
           <FormControl>
@@ -178,7 +252,7 @@ export default function MarkdownForm({ tag }) {
           }}
         >
           <Button type="sumbit" colorScheme="yellow">
-            upload <ArrowUpIcon />
+            {postValue && postValue.id ? "수정" : "업로드"} <ArrowUpIcon />
           </Button>
         </Flex>
       </form>
