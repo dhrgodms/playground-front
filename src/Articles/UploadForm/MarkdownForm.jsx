@@ -8,6 +8,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { ArrowUpIcon } from "@chakra-ui/icons";
@@ -39,6 +40,64 @@ export default function MarkdownForm({ tag, postValue }) {
   }, [postValue]);
   const [value, setValue] = React.useState(postValue ? "**로딩 중...**" : "**Hello world!!!**");
 
+  // 클립보드 이미지 붙여넣기 처리
+  const handlePaste = async (event) => {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        event.preventDefault();
+
+        let file = item.getAsFile();
+        if (file) {
+          // 파일명에서 띄어쓰기를 _로 치환
+          const safeName = file.name ? file.name.replace(/\s+/g, '_') : 'image.png';
+          console.log('원본 파일명:', file.name);
+          console.log('변환된 파일명:', safeName);
+          file = new File([file], safeName, { type: file.type });
+          console.log('새로 생성된 파일명:', file.name);
+          try {
+            // 이미지 업로드
+            const formData = new FormData();
+            formData.append('files', file, safeName);
+
+            const response = await axios.post(
+              `${serverUrlV2}/files/upload`,
+              formData,
+              { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+
+            const imageUrl = response.data;
+            const imageMarkdown = `![이미지](${imageUrl})`;
+
+            // 현재 커서 위치에 이미지 마크다운 삽입
+            const textarea = event.target;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newValue = value.substring(0, start) + imageMarkdown + value.substring(end);
+            setValue(newValue);
+
+            toast({
+              title: "이미지가 업로드되었습니다",
+              status: "success",
+              isClosable: true,
+            });
+          } catch (error) {
+            console.error("이미지 업로드 실패:", error);
+            toast({
+              title: "이미지 업로드에 실패했습니다",
+              status: "error",
+              isClosable: true,
+            });
+          }
+        }
+        break;
+      }
+    }
+  };
+
   // 기존 MD 파일 내용을 가져오는 useEffect
   useEffect(() => {
     if (postValue && postValue.fileUrls && postValue.fileUrls.length > 0) {
@@ -63,6 +122,101 @@ export default function MarkdownForm({ tag, postValue }) {
       fetchMarkdownContent();
     }
   }, [postValue]);
+
+  // 클립보드 이벤트 리스너 추가
+  useEffect(() => {
+    console.log('클립보드 이벤트 리스너 등록됨');
+    const handleGlobalPaste = async (event) => {
+      console.log('paste 이벤트 발생:', event.target);
+      const items = event.clipboardData?.items;
+      console.log('clipboardData items:', items);
+      console.log('items length:', items?.length);
+      for (let i = 0; i < items.length; i++) {
+        console.log(`item ${i}:`, items[i]);
+        console.log(`item ${i} type:`, items[i].type);
+        console.log(`item ${i} kind:`, items[i].kind);
+      }
+      if (!items) return;
+
+      // MD Editor 내부에서만 처리
+      const target = event.target;
+      console.log('target:', target);
+      console.log('closest .w-md-editor:', target.closest('.w-md-editor'));
+      if (!target.closest('.w-md-editor')) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        console.log('item type:', item.type);
+        if (item.type.indexOf('image') !== -1) {
+          console.log('이미지 파일 감지됨!');
+          event.preventDefault();
+
+          const file = item.getAsFile();
+          console.log('getAsFile() 결과:', file);
+          console.log('file name:', file?.name);
+          console.log('file size:', file?.size);
+          console.log('file type:', file?.type);
+          if (file) {
+            // 파일명에서 띄어쓰기를 _로 치환
+            const safeName = file.name ? file.name.replace(/\s+/g, '_') : 'image.png';
+            console.log('원본 파일명:', file.name);
+            console.log('변환된 파일명:', safeName);
+            const newFile = new File([file], safeName, { type: file.type });
+            console.log('새로 생성된 파일명:', newFile.name);
+            try {
+              // 이미지 업로드
+              const formData = new FormData();
+              formData.append('files', newFile, safeName);
+
+              const response = await axios.post(
+                `${serverUrlV2}/files/upload`,
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+              );
+
+              const imageUrl = response.data;
+              const imageMarkdown = `![이미지](${imageUrl})`;
+
+              // 현재 커서 위치에 이미지 마크다운 삽입
+              const textarea = target.closest('.w-md-editor')?.querySelector('textarea');
+              if (textarea) {
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const currentValue = value;
+                const newValue = currentValue.substring(0, start) + imageMarkdown + currentValue.substring(end);
+                setValue(newValue);
+
+                // 커서 위치 업데이트
+                setTimeout(() => {
+                  textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length);
+                }, 0);
+              }
+
+              toast({
+                title: "이미지가 업로드되었습니다",
+                status: "success",
+                isClosable: true,
+              });
+            } catch (error) {
+              console.error("이미지 업로드 실패:", error);
+              toast({
+                title: "이미지 업로드에 실패했습니다",
+                status: "error",
+                isClosable: true,
+              });
+            }
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handleGlobalPaste);
+
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste);
+    };
+  }, [value]);
 
   function handleInputChange(event) {
     const { name, value } = event.target;
@@ -132,21 +286,8 @@ export default function MarkdownForm({ tag, postValue }) {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      // 1. 마크다운을 파일로 변환
-      const markdownBlob = new Blob([value], { type: "text/markdown" });
-      const markdownFile = new File([markdownBlob], "post.md", { type: "text/markdown" });
-
-      // 2. FormData에 파일로 첨부
-      const formDataFile = new FormData();
-      formDataFile.append("files", markdownFile);
-
-      // 3. 파일 업로드
-      const uploadRes = await axios.post(
-        `${serverUrlV2}/files/upload`,
-        formDataFile,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      const fileUrl = uploadRes.data; // S3 URL
+      // MD 내용을 직접 content로 사용
+      const markdownContent = value;
 
       // 4. 게시글 등록 또는 수정
       if (postValue && postValue.id) {
@@ -154,10 +295,9 @@ export default function MarkdownForm({ tag, postValue }) {
         const res = await axios.put(`${serverUrlV2}/posts/${postValue.id}`, {
           id: postValue.id,
           contentTitle: formData.content_title,
-          content: fileUrl,
+          content: markdownContent,
           thumbnail: formData.thumbnail,
           tag: 3, // MD 파일 태그
-          fileUrls: [fileUrl],
         });
 
         if (res?.data) {
@@ -181,10 +321,9 @@ export default function MarkdownForm({ tag, postValue }) {
         // 새 게시글 작성 모드
         const res = await axios.post(`${serverUrlV2}/posts`, {
           contentTitle: formData.content_title,
-          content: fileUrl,
+          content: markdownContent,
           thumbnail: formData.thumbnail,
           tag: 3, // MD 파일 태그
-          fileUrls: [fileUrl],
         });
 
         if (res?.data) {
@@ -238,8 +377,15 @@ export default function MarkdownForm({ tag, postValue }) {
           </FormControl>
           <FormControl>
             <FormLabel>Content</FormLabel>
+            <Text fontSize="sm" color="gray.600" mb={2}>
+              💡 팁: 이미지를 복사한 후 Ctrl+V(붙여넣기)를 하면 자동으로 업로드됩니다!
+            </Text>
             <div className="container" data-color-mode="light">
-              <MDEditor value={value} onChange={setValue} height={500} />
+              <MDEditor
+                value={value}
+                onChange={setValue}
+                height={500}
+              />
             </div>
           </FormControl>
           <SettingUserThumbnail />

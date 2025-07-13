@@ -13,18 +13,10 @@ function UploadForm() {
         <SubTemplate titleQuery={"uploadform"} pageTitle={"uploadform"}>
             <Tabs variant='soft-rounded' colorScheme='yellow'>
                 <TabList>
-                    <Tab>글</Tab>
-                    <Tab>그림</Tab>
-                    <Tab>MD 파일</Tab>
-                    <Tab>File</Tab>
+                    <Tab>.md</Tab>
+                    <Tab>Files</Tab>
                 </TabList>
                 <TabPanels>
-                    <TabPanel>
-                        <WriteForm tag={1} />
-                    </TabPanel>
-                    <TabPanel>
-                        <ImageForm tag={2} />
-                    </TabPanel>
                     <TabPanel>
                         <MarkdownForm tag={3} />
                     </TabPanel>
