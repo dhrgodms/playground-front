@@ -47,8 +47,9 @@ export const PostCard = ({ post }) => {
             shadow="sm"
             _hover={{
                 transform: "translateY(-1px)",
-                shadow: "md",
-                borderColor: "#F7DC6F"
+                shadow: "lg",
+                borderColor: "#CBD5E0",
+                transition: "all 0.2s ease-in-out"
             }}
         >
             <Flex direction="row" align="center" gap={4}>

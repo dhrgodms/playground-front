@@ -99,7 +99,7 @@ const DefaultPost = () => {
 
   // tag가 2(만화글)일 때 이미지 가져오기
   useEffect(() => {
-    if (writePost.tag === 2) {
+    if (writePost.categoryId === 2) {
       axios
         .get(`${serverUrl}:8080/api/image/all/${id}`)
         .then((response) => {
@@ -107,7 +107,7 @@ const DefaultPost = () => {
         })
         .catch((error) => console.log(error));
     }
-  }, [id, writePost.tag]);
+  }, [id, writePost.categoryId]);
 
   // 파일 확장자에 따라 아이콘과 표시 방식을 결정하는 함수
   const getFileDisplayInfo = (fileUrl) => {
@@ -260,12 +260,14 @@ const DefaultPost = () => {
             </CardBody>
           </Card>
         </Box>
-        <CommentContainer
-          id={id}
-          commentAll={commentAll}
-          setCommentAll={setCommentAll}
-          writePost={writePost}
-        />
+        <Box mt={8}>
+          <CommentContainer
+            id={id}
+            commentAll={commentAll}
+            setCommentAll={setCommentAll}
+            writePost={writePost}
+          />
+        </Box>
       </SubTemplate>
     </Skeleton>
   );

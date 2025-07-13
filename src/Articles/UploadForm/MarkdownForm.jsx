@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import ThumbnailUpload from "../../Atoms/ThumbnailUpload";
 import { categories, serverUrlV2 } from "../../Constants/Constants";
 
-export default function MarkdownForm({ tag, postValue }) {
+export default function MarkdownForm({ categoryId, postValue }) {
   const toast = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -25,8 +25,7 @@ export default function MarkdownForm({ tag, postValue }) {
     content: postValue ? postValue.content : "내용!",
     thumbnail: postValue ? postValue.thumbnail : "",
     categoryId: postValue ? postValue.categoryId : 1, // 기본값: 생각글
-    // tag : 1=글, 2=그림, 3=MD파일
-    tag: 1
+    // categoryId : 1=글, 2=그림, 3=MD파일
   });
 
   // postValue가 변경될 때 formData 업데이트
@@ -38,7 +37,6 @@ export default function MarkdownForm({ tag, postValue }) {
         content: postValue.content || "내용!",
         thumbnail: postValue.thumbnail || "",
         categoryId: postValue.categoryId || 1,
-        tag: 3
       });
     }
   }, [postValue]);
@@ -241,8 +239,7 @@ export default function MarkdownForm({ tag, postValue }) {
         contentTitle: formData.content_title,
         content: value, // MD 에디터의 내용을 content에 저장
         thumbnail: formData.thumbnail,
-        categoryId: formData.categoryId,
-        tag: formData.tag
+        categoryId: formData.categoryId
       };
 
       if (postValue?.id) {

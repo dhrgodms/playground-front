@@ -37,10 +37,10 @@ function UploadForm() {
             </TabList>
             <TabPanels>
                 <TabPanel>
-                    <MarkdownForm tag={3} />
+                    <MarkdownForm categoryId={3} />
                 </TabPanel>
                 <TabPanel>
-                    <FileForm tag={4} />
+                    <FileForm categoryId={4} />
                 </TabPanel>
             </TabPanels>
         </Tabs>

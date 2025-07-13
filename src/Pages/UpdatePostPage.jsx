@@ -111,7 +111,7 @@ function UpdatePostPage() {
           contentTitle: formData.contentTitle,
           content: formData.content,
           thumbnail: formData.thumbnail,
-          tag: writePost.tag,
+          categoryId: writePost.categoryId,
           fileUrls: writePost.fileUrls,
         })
         .then((res) => {
@@ -249,7 +249,7 @@ function UpdatePostPage() {
             </Box>
           </TabPanel>
           <TabPanel>
-            <MarkdownForm tag={3} postValue={writePost} />
+            <MarkdownForm categoryId={3} postValue={writePost} />
           </TabPanel>
         </TabPanels>
       </Tabs>

@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import ThumbnailUpload from "../../Atoms/ThumbnailUpload";
 import { serverUrlV2 } from "../../Constants/Constants";
 
-export const FileForm = ({ tag }) => {
+export const FileForm = ({ categoryId }) => {
   const toast = useToast();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -28,7 +28,7 @@ export const FileForm = ({ tag }) => {
     content_title: "",
     content: "내용!",
     thumbnail: "",
-    tag: tag,
+    categoryId: 1,
     likes: 0,
     views: 0,
   });
@@ -122,7 +122,7 @@ export const FileForm = ({ tag }) => {
         contentTitle: formData.content_title,
         content: formData.content,
         thumbnail: formData.thumbnail,
-        tag: formData.tag,
+        categoryId: formData.categoryId,
         fileUrls: s3Urls
       });
       setFormData({

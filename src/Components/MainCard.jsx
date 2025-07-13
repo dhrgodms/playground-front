@@ -41,8 +41,9 @@ export const MainCard = ({ ListTitle, post }) => {
       shadow="sm"
       _hover={{
         transform: "translateY(-2px)",
-        shadow: "md",
-        borderColor: "#F7DC6F"
+        shadow: "lg",
+        borderColor: "#CBD5E0",
+        transition: "all 0.2s ease-in-out"
       }}
     >
       <CardHeader bg="#F8F9FA" borderBottom="1px solid" borderColor="#E2E8F0">
