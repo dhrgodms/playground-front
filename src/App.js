@@ -1,18 +1,18 @@
+import { ChakraProvider } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import { ChakraProvider } from '@chakra-ui/react';
-import MainPage from './Pages/MainPage';
-import DefaultPost from './Articles/Post/DefaultPost';
-import MarkdownPostLists from './Articles/Post/MarkdownPostLists';
-import GuestBook from './Articles/Post/GuestBook';
-import WritePostsList from './Articles/Post/WritePostsList';
-import ImagesPostsLists from './Articles/Post/ImagesPostsLists';
-import LoginPage from "./Pages/LoginPage";
-import UploadPostPage from "./Pages/UploadPostPage";
-import UpdatePostPage from "./Pages/UpdatePostPage";
 import AllPostsList from "./Articles/Post/AllPostsList";
-import SignUpPage from "./Pages/SignUpPage";
+import DefaultPost from './Articles/Post/DefaultPost';
 import FilePostsList from "./Articles/Post/FilePostsList";
+import GuestBook from './Articles/Post/GuestBook';
+import ImagesPostsLists from './Articles/Post/ImagesPostsLists';
+import MarkdownPostLists from './Articles/Post/MarkdownPostLists';
+import WritePostsList from './Articles/Post/WritePostsList';
+import LoginPage from "./Pages/LoginPage";
+import MainPage from './Pages/MainPage';
+import SignUpPage from "./Pages/SignUpPage";
+import UpdatePostPage from "./Pages/UpdatePostPage";
+import UploadPostPage from "./Pages/UploadPostPage";
 
 function App() {
 

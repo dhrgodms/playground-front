@@ -29,13 +29,28 @@ export const MainCard = ({ ListTitle, post }) => {
     return title?.length > 10 ? title.slice(0, 10) + "..." : title;
   }
   return (
-    <Card maxW="md" style={{ cursor: 'pointer' }} onClick={handleCardClick} ref={btnRef}>
-      <CardHeader>
+    <Card
+      maxW="sm"
+      style={{ cursor: 'pointer' }}
+      onClick={handleCardClick}
+      ref={btnRef}
+      bg="white"
+      color="#4A5568"
+      border="1px solid"
+      borderColor="#E2E8F0"
+      shadow="sm"
+      _hover={{
+        transform: "translateY(-2px)",
+        shadow: "md",
+        borderColor: "#F7DC6F"
+      }}
+    >
+      <CardHeader bg="#F8F9FA" borderBottom="1px solid" borderColor="#E2E8F0">
         <Flex spacing="4">
           <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
             <Box>
-              <Heading size="lg">{ListTitle}</Heading>
-              <Text>{"<" + trimContentTitle(post?.contentTitle) + ">"}</Text>
+              <Heading size="lg" color="#4A5568">{ListTitle}</Heading>
+              <Text color="#A0AEC0">{"<" + trimContentTitle(post?.contentTitle) + ">"}</Text>
             </Box>
           </Flex>
         </Flex>
@@ -44,9 +59,10 @@ export const MainCard = ({ ListTitle, post }) => {
       {/* 고정된 크기의 이미지 컨테이너 */}
       <Box
         width="100%"
-        height="200px"
+        height="180px"
         position="relative"
         overflow="hidden"
+        bg="#F8F9FA"
       >
         <Image
           src={post?.thumbnail}
@@ -61,6 +77,9 @@ export const MainCard = ({ ListTitle, post }) => {
       <CardFooter
         justify="center"
         flexWrap="wrap"
+        bg="#F8F9FA"
+        borderTop="1px solid"
+        borderColor="#E2E8F0"
         sx={{
           '& > button': {
             minW: '136px',
@@ -68,15 +87,15 @@ export const MainCard = ({ ListTitle, post }) => {
         }}
       >
         <HStack spacing={3}>
-          <Tag size={'md'} key={1} variant='subtle' colorScheme='gray'>
+          <Tag size={'md'} key={1} variant='solid' colorScheme='blue' bg="#2C3E50">
             <TagLeftIcon boxSize='12px' as={ViewIcon} />
             <TagLabel>{post?.views}</TagLabel>
           </Tag>
-          <Tag size={'md'} key={2} variant='subtle' colorScheme='cyan'>
+          <Tag size={'md'} key={2} variant='solid' colorScheme='cyan' bg="#34495E">
             <TagLeftIcon boxSize='12px' as={ChatIcon} />
             <TagLabel>{post?.commentCount}</TagLabel>
           </Tag>
-          <Tag size={'md'} key={3} variant='subtle' colorScheme='pink'>
+          <Tag size={'md'} key={3} variant='solid' colorScheme='pink' bg="#E74C3C">
             <TagLeftIcon boxSize='12px' as={AiFillHeart} />
             <TagLabel>{post?.likes}</TagLabel>
           </Tag>

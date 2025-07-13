@@ -5,16 +5,15 @@ import {
   CardHeader,
   Flex,
   Heading,
-  Image,
   SimpleGrid,
   Skeleton,
-  Text,
+  Text
 } from "@chakra-ui/react";
-import { MainCard } from "./MainCard";
-import React, { useEffect, useState } from "react";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { serverUrlV2 } from "../Constants/Constants";
+import { MainCard } from "./MainCard";
 export const PostLists = () => {
   const [mainPostsdata, setMainPostsdata] = useState([]);
   const navigate = useNavigate();
@@ -72,7 +71,13 @@ export const PostLists = () => {
   };
 
   return (
-    <Skeleton fadeDuration={1} isLoaded={isLoaded}>
+    <Skeleton
+      fadeDuration={1}
+      isLoaded={isLoaded}
+      startColor="#F8F9FA"
+      endColor="#E2E8F0"
+      borderRadius="lg"
+    >
       <SimpleGrid
         spacing={4}
         templateColumns="repeat(auto-fill, minmax(200px, 1fr))"

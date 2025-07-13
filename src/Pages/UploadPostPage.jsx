@@ -1,37 +1,58 @@
-import React from 'react';
 import {
-    Flex, Box, TabPanel, Tab, TabPanels, TabList, Tabs,
+    Tab,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Tabs
 } from '@chakra-ui/react';
-import SubTemplate from "../Templates/SubTemplate";
-import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
+import React from 'react';
 import { FileForm } from "../Articles/UploadForm/FileForm";
-function UploadForm() {
+import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
+import SubTemplate from "../Templates/SubTemplate";
 
+function UploadForm() {
     return (
-        <SubTemplate titleQuery={"uploadform"} pageTitle={"uploadform"}>
-            <Tabs variant='soft-rounded' colorScheme='yellow'>
-                <TabList>
-                    <Tab>.md</Tab>
-                    <Tab>Files</Tab>
-                </TabList>
-                <TabPanels>
-                    <TabPanel>
-                        <MarkdownForm tag={3} />
-                    </TabPanel>
-                    <TabPanel>
-                        <FileForm tag={4} />
-                    </TabPanel>
-                </TabPanels>
-            </Tabs>
-        </SubTemplate>
+        <Tabs variant='soft-rounded' colorScheme='yellow'>
+            <TabList bg="#F8F9FA" borderRadius="md" p={1}>
+                <Tab
+                    _selected={{
+                        bg: '#F7DC6F',
+                        color: '#4A5568',
+                        fontWeight: 'bold'
+                    }}
+                    color="#4A5568"
+                >
+                    .md
+                </Tab>
+                <Tab
+                    _selected={{
+                        bg: '#F7DC6F',
+                        color: '#4A5568',
+                        fontWeight: 'bold'
+                    }}
+                    color="#4A5568"
+                >
+                    Files
+                </Tab>
+            </TabList>
+            <TabPanels>
+                <TabPanel>
+                    <MarkdownForm tag={3} />
+                </TabPanel>
+                <TabPanel>
+                    <FileForm tag={4} />
+                </TabPanel>
+            </TabPanels>
+        </Tabs>
     );
 }
 
 const UploadPostPage = () => {
-    return (<Flex justify={'center'}>
-        <Box>
+    return (
+        <SubTemplate titleQuery={"uploadform"} pageTitle={"uploadform"}>
             <UploadForm />
-        </Box>
-    </Flex>);
+        </SubTemplate>
+    );
 }
+
 export default UploadPostPage;

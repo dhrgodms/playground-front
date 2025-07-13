@@ -23,7 +23,13 @@ const MarkdownPostLists = () => {
     return (
         <MainTemplate pageTitle={"md file view"} titleQuery={"markdown file"}>
             <Flex height={"100vh"} style={{ flexDirection: "column" }}>
-                <Skeleton isLoaded={isLoaded} fadeDuration={1}>
+                <Skeleton
+                    isLoaded={isLoaded}
+                    fadeDuration={1}
+                    startColor="#F8F9FA"
+                    endColor="#E2E8F0"
+                    borderRadius="lg"
+                >
                     <VStack spacing={4} align="stretch">
                         {writePosts.map((item) =>
                             item.id > 1 ? <PostCard key={item.id} post={item} /> : null

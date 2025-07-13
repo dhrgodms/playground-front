@@ -129,120 +129,137 @@ const DefaultPost = () => {
   };
 
   return (
-    <Skeleton isLoaded={isLoaded} fadeDuration={1}>
+    <Skeleton
+      isLoaded={isLoaded}
+      fadeDuration={1}
+      startColor="#F8F9FA"
+      endColor="#E2E8F0"
+      borderRadius="lg"
+    >
       <SubTemplate
         pageTitle={writePost.contentTitle}
         titleQuery={writePost.contentTitle}
       >
         <ScrollToTop />
-        <HStack justify={"space-between"} mb={4}>
-          <Flex gap={2}>
-            <Tag size={"lg"} colorScheme={"pink"} variant={"subtle"}>
-              <TagLeftIcon as={ViewIcon} />
-              <TagLabel>{writePost.views}</TagLabel>
-            </Tag>
-            <Tag size={"lg"} colorScheme={"blue"} variant={"subtle"}>
-              <TagLeftIcon as={ChatIcon} />
-              <TagLabel>{commentAll.length}</TagLabel>
-            </Tag>
-            <Tag size={"lg"} colorScheme={"red"} variant={"subtle"}>
-              <TagLeftIcon as={AiFillHeart} />
-              <TagLabel>{writePost.likes}</TagLabel>
-            </Tag>
-          </Flex>
-          <Flex justify={"flex-end"}>
-            <Button
-              type={"submit"}
-              onClick={handleLikes}
-              aria-label={"likes"}
-              colorScheme={"pink"}
-            >
-              <AiFillHeart />
-            </Button>
-          </Flex>
-        </HStack>
-        <Card>
-          <CardBody>
-            {/* tag가 3(MD파일)일 때 content를 markdown으로 렌더링 */}
-            {writePost.tag === 3 ? (
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="lg"
+          borderWidth="1px"
+          borderColor="#E2E8F0"
+          color="#4A5568"
+          boxShadow="sm"
+          position="relative"
+          _before={{
+            content: '""',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            right: '0',
+            height: '3px',
+            bg: '#2C3E50',
+            borderRadius: 'lg lg 0 0'
+          }}
+        >
+          <HStack justify={"space-between"} mb={4}>
+            <Flex gap={2}>
+              <Tag size={"lg"} colorScheme={"pink"} variant={"solid"} bg="#E74C3C">
+                <TagLeftIcon as={ViewIcon} />
+                <TagLabel>{writePost.views}</TagLabel>
+              </Tag>
+              <Tag size={"lg"} colorScheme={"blue"} variant={"solid"} bg="#2C3E50">
+                <TagLeftIcon as={ChatIcon} />
+                <TagLabel>{commentAll.length}</TagLabel>
+              </Tag>
+              <Tag size={"lg"} colorScheme={"red"} variant={"solid"} bg="#E74C3C">
+                <TagLeftIcon as={AiFillHeart} />
+                <TagLabel>{writePost.likes}</TagLabel>
+              </Tag>
+            </Flex>
+            <Flex justify={"flex-end"}>
+              <Button
+                type={"submit"}
+                onClick={handleLikes}
+                aria-label={"likes"}
+                colorScheme={"pink"}
+                bg="#E74C3C"
+                color="white"
+                _hover={{ bg: '#C0392B' }}
+              >
+                <AiFillHeart />
+              </Button>
+            </Flex>
+          </HStack>
+          <Card bg="white" border="1px solid" borderColor="#E2E8F0" shadow="sm">
+            <CardBody>
+              {/* 모든 content를 마크다운으로 렌더링 */}
               <MDEditor.Markdown
                 source={writePost.content}
                 style={{
                   whiteSpace: "pre-wrap",
                   backgroundColor: "white",
-                  color: "black",
+                  color: "#4A5568",
                 }}
               />
-            ) : (
-              // 일반 텍스트 content 표시
-              <div
-                style={{
-                  whiteSpace: "pre-wrap",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-              >
-                {writePost.content}
-              </div>
-            )}
 
-            {/* 기존 이미지들 표시 */}
-            {images.map((image, index) => (
-              <Image key={index} src={image.url} alt={image.id} />
-            ))}
+              {/* 기존 이미지들 표시 */}
+              {images.map((image, index) => (
+                <Image key={index} src={image.url} alt={image.id} />
+              ))}
 
-            {/* 첨부 파일들 표시 */}
-            {writePost.fileUrls && writePost.fileUrls.length > 0 && (
-              <Box mt={4}>
-                <Text fontSize="lg" fontWeight="bold" mb={3}>
-                  첨부 파일
-                </Text>
-                <VStack spacing={2} align="stretch">
-                  {writePost.fileUrls.map((fileUrl, index) => {
-                    const fileInfo = getFileDisplayInfo(fileUrl);
-                    const fileName = fileUrl.split('/').pop();
+              {/* 첨부 파일들 표시 */}
+              {writePost.fileUrls && writePost.fileUrls.length > 0 && (
+                <Box mt={4}>
+                  <Text fontSize="lg" fontWeight="bold" mb={3} color="#4A5568">
+                    첨부 파일
+                  </Text>
+                  <VStack spacing={2} align="stretch">
+                    {writePost.fileUrls.map((fileUrl, index) => {
+                      const fileInfo = getFileDisplayInfo(fileUrl);
+                      const fileName = fileUrl.split('/').pop();
 
-                    return (
-                      <Box key={index} p={3} border="1px" borderColor="gray.200" borderRadius="md">
-                        {fileInfo.type === 'image' ? (
-                          <VStack spacing={2}>
-                            <Text fontWeight="medium">{fileName}</Text>
-                            <Image
-                              src={fileUrl}
-                              alt={fileName}
-                              maxH="400px"
-                              objectFit="contain"
-                              borderRadius="md"
-                            />
-                            <Link href={fileUrl} isExternal color="blue.500">
+                      return (
+                        <Box key={index} p={3} border="1px" borderColor="#E2E8F0" borderRadius="md" bg="#F8F9FA">
+                          {fileInfo.type === 'image' ? (
+                            <VStack spacing={2}>
+                              <Text fontWeight="medium" color="#4A5568">{fileName}</Text>
+                              <Image
+                                src={fileUrl}
+                                alt={fileName}
+                                maxH="400px"
+                                objectFit="contain"
+                                borderRadius="md"
+                              />
+                              <Link href={fileUrl} isExternal color="#2C3E50">
+                                <HStack>
+                                  <ExternalLinkIcon />
+                                  <Text>원본 보기</Text>
+                                </HStack>
+                              </Link>
+                            </VStack>
+                          ) : (
+                            <HStack justify="space-between">
                               <HStack>
-                                <ExternalLinkIcon />
-                                <Text>원본 보기</Text>
+                                {fileInfo.icon}
+                                <Text fontWeight="medium" color="#4A5568">{fileName}</Text>
                               </HStack>
-                            </Link>
-                          </VStack>
-                        ) : (
-                          <HStack justify="space-between">
-                            <HStack>
-                              {fileInfo.icon}
-                              <Text fontWeight="medium">{fileName}</Text>
+                              <Link href={fileUrl} isExternal color="#2C3E50">
+                                <HStack>
+                                  <DownloadIcon />
+                                  <Text>다운로드</Text>
+                                </HStack>
+                              </Link>
                             </HStack>
-                            <Link href={fileUrl} isExternal color="blue.500">
-                              <HStack>
-                                <DownloadIcon />
-                                <Text>다운로드</Text>
-                              </HStack>
-                            </Link>
-                          </HStack>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </VStack>
-              </Box>
-            )}
-          </CardBody>
-        </Card>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </VStack>
+                </Box>
+              )}
+            </CardBody>
+          </Card>
+        </Box>
         <CommentContainer
           id={id}
           commentAll={commentAll}

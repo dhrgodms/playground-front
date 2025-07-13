@@ -23,7 +23,13 @@ const FilePostsList = () => {
     return (
         <MainTemplate pageTitle={"File Post List Testpage"} titleQuery={"파일"}>
             <Flex height={"100vh"} style={{ flexDirection: "column" }}>
-                <Skeleton isLoaded={isLoaded} fadeDuration={1}>
+                <Skeleton
+                    isLoaded={isLoaded}
+                    fadeDuration={1}
+                    startColor="#F8F9FA"
+                    endColor="#E2E8F0"
+                    borderRadius="lg"
+                >
                     <VStack spacing={4} align="stretch">
                         {filePosts.map((item) => (
                             <PostCard key={item.id} post={item} />

@@ -32,24 +32,35 @@ export const PostCard = ({ post }) => {
 
     return (
         <Card
-            w="40em"
+            w="36em"
             mx="auto"
             style={{ cursor: 'pointer' }}
             onClick={handleCardClick}
             ref={btnRef}
-            mb={4}
+            mb={2}
             p={4}
-            minH="140px"
+            minH="126px"
+            bg="white"
+            color="#4A5568"
+            border="1px solid"
+            borderColor="#E2E8F0"
+            shadow="sm"
+            _hover={{
+                transform: "translateY(-1px)",
+                shadow: "md",
+                borderColor: "#F7DC6F"
+            }}
         >
             <Flex direction="row" align="center" gap={4}>
                 {/* 썸네일 이미지 */}
                 <Box
-                    width="180px"
-                    height="120px"
+                    width="162px"
+                    height="108px"
                     position="relative"
                     overflow="hidden"
                     flexShrink={0}
                     borderRadius="md"
+                    bg="#F8F9FA"
                 >
                     <Image
                         src={post.thumbnail}
@@ -63,17 +74,17 @@ export const PostCard = ({ post }) => {
 
                 {/* 카드 내용 */}
                 <Box flex="1">
-                    <Heading size="md" noOfLines={1} mb={2}>
+                    <Heading size="md" noOfLines={1} mb={2} color="#4A5568">
                         {post.contentTitle}
                     </Heading>
-                    <Text noOfLines={2} color="gray.600" fontSize="sm">
+                    <Text noOfLines={2} color="#A0AEC0" fontSize="sm">
                         {truncateText(post.content, 100)}
                     </Text>
 
                     {/* 파일 첨부 정보 표시 */}
                     {post.fileUrls && post.fileUrls.length > 0 && (
                         <HStack mt={2} spacing={2}>
-                            <Tag size="sm" colorScheme="blue" variant="subtle">
+                            <Tag size="sm" colorScheme="blue" variant="solid" bg="#2C3E50">
                                 <TagLeftIcon as={AttachmentIcon} />
                                 <TagLabel>{post.fileUrls.length}개 파일</TagLabel>
                             </Tag>
@@ -84,15 +95,15 @@ export const PostCard = ({ post }) => {
                 {/* 조회수, 좋아요, 댓글 정보 */}
                 <Box flexShrink={0}>
                     <VStack spacing={2} align="center">
-                        <Tag size="sm" variant="subtle" colorScheme="gray">
+                        <Tag size="sm" variant="solid" colorScheme="blue" bg="#2C3E50">
                             <TagLeftIcon as={ViewIcon} />
                             <TagLabel>{post.views || 0}</TagLabel>
                         </Tag>
-                        <Tag size="sm" variant="subtle" colorScheme="cyan">
+                        <Tag size="sm" variant="solid" colorScheme="cyan" bg="#34495E">
                             <TagLeftIcon as={ChatIcon} />
                             <TagLabel>{post.commentCount || 0}</TagLabel>
                         </Tag>
-                        <Tag size="sm" variant="subtle" colorScheme="pink">
+                        <Tag size="sm" variant="solid" colorScheme="pink" bg="#E74C3C">
                             <TagLeftIcon as={AiFillHeart} />
                             <TagLabel>{post.likes || 0}</TagLabel>
                         </Tag>

@@ -17,7 +17,13 @@ const ImagesPostsLists = () => {
     return (
         <MainTemplate pageTitle={'끄적..만화 모음'} titleQuery={'만화'}>
             <Flex height={'100vh'} style={{ flexDirection: 'column' }}>
-                <Skeleton isLoaded={isLoaded} fadeDuration={1}>
+                <Skeleton
+                    isLoaded={isLoaded}
+                    fadeDuration={1}
+                    startColor="#F8F9FA"
+                    endColor="#E2E8F0"
+                    borderRadius="lg"
+                >
                     <VStack spacing={4} align="stretch">
                         {imagePosts.map(item => (
                             <PostCard key={item.id} post={item} />
