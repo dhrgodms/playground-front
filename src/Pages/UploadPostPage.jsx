@@ -3,8 +3,6 @@ import {
     Flex, Box, TabPanel, Tab, TabPanels, TabList, Tabs,
 } from '@chakra-ui/react';
 import SubTemplate from "../Templates/SubTemplate";
-import { WriteForm } from "../Articles/UploadForm/WriteForm";
-import { ImageForm } from "../Articles/UploadForm/ImageForm";
 import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
 import { FileForm } from "../Articles/UploadForm/FileForm";
 function UploadForm() {

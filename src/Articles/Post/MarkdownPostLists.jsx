@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Flex, SimpleGrid, Skeleton } from "@chakra-ui/react";
+import { Flex, Skeleton, VStack } from "@chakra-ui/react";
 import axios from "axios";
-import MainTemplate from "../../Templates/MainTemplate";
+import React, { useEffect, useState } from "react";
 import { PostCard } from "../../Components/PostCard";
 import { serverUrlV2 } from "../../Constants/Constants";
+import MainTemplate from "../../Templates/MainTemplate";
 
 const MarkdownPostLists = () => {
     const [writePosts, setWritePosts] = useState([
@@ -24,14 +24,11 @@ const MarkdownPostLists = () => {
         <MainTemplate pageTitle={"md file view"} titleQuery={"markdown file"}>
             <Flex height={"100vh"} style={{ flexDirection: "column" }}>
                 <Skeleton isLoaded={isLoaded} fadeDuration={1}>
-                    <SimpleGrid
-                        spacing={4}
-                        templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
-                    >
+                    <VStack spacing={4} align="stretch">
                         {writePosts.map((item) =>
                             item.id > 1 ? <PostCard key={item.id} post={item} /> : null
                         )}
-                    </SimpleGrid>
+                    </VStack>
                 </Skeleton>
             </Flex>
         </MainTemplate>

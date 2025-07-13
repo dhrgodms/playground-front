@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Flex, SimpleGrid, Skeleton } from '@chakra-ui/react';
+import { Flex, Skeleton, VStack } from '@chakra-ui/react';
 import axios from "axios";
-import MainTemplate from "../../Templates/MainTemplate";
+import React, { useEffect, useState } from 'react';
 import { PostCard } from "../../Components/PostCard";
-import serverUrl, { serverUrlV2 } from "../../Constants/Constants";
+import { serverUrlV2 } from "../../Constants/Constants";
+import MainTemplate from "../../Templates/MainTemplate";
 
 const ImagesPostsLists = () => {
     const [imagePosts, setImagePosts] = useState([{ id: 1, postListTile: '꾸잉', postNo: 1 }]);
@@ -18,14 +18,11 @@ const ImagesPostsLists = () => {
         <MainTemplate pageTitle={'끄적..만화 모음'} titleQuery={'만화'}>
             <Flex height={'100vh'} style={{ flexDirection: 'column' }}>
                 <Skeleton isLoaded={isLoaded} fadeDuration={1}>
-                    <SimpleGrid
-                        spacing={4}
-                        templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
-                    >
+                    <VStack spacing={4} align="stretch">
                         {imagePosts.map(item => (
                             <PostCard key={item.id} post={item} />
                         ))}
-                    </SimpleGrid>
+                    </VStack>
                 </Skeleton>
             </Flex>
         </MainTemplate>

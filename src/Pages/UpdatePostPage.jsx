@@ -1,40 +1,43 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowUpIcon, DeleteIcon } from "@chakra-ui/icons";
 import {
   Box,
-  Flex,
-  Input,
-  Textarea,
-  useToast,
-  FormControl,
   Button,
+  Flex,
+  FormControl,
   FormLabel,
-  useDisclosure,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
   ModalBody,
+  ModalCloseButton,
+  ModalContent,
   ModalFooter,
-  Tabs,
-  TabList,
+  ModalHeader,
+  ModalOverlay,
   Tab,
-  TabPanels,
+  TabList,
   TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  Textarea,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { ArrowUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import SubTemplate from "../Templates/SubTemplate";
-import * as PropTypes from "prop-types";
-import { ImageForm } from "../Articles/UploadForm/ImageForm";
 import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
+import ThumbnailUpload from "../Atoms/ThumbnailUpload";
 import { serverUrl, serverUrlV2 } from "../Constants/Constants";
-function Lorem(props) {
-  return null;
-}
+import SubTemplate from "../Templates/SubTemplate";
 
-Lorem.propTypes = { count: PropTypes.number };
+function Lorem(props) {
+  return (
+    <Text>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+      tempor incididunt ut labore et dolore magna aliqua.
+    </Text>
+  );
+}
 
 function UpdatePostPage() {
   const { id } = useParams();
@@ -75,7 +78,6 @@ function UpdatePostPage() {
     });
   }, [writePost]);
 
-
   function onDeletePost() {
     axios
       .delete(`${serverUrlV2}/posts/${id}`)
@@ -90,100 +92,16 @@ function UpdatePostPage() {
       })
       .catch((error) => console.log(error));
   }
+
   function handleInputChange(event) {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   }
 
-  const SettingUserThumbnail = () => {
-    const inputRef = useRef(null);
-    const onUploadImage = useCallback((e) => {
-      if (!e.target.files) {
-        return;
-      }
-
-      const formImageData = new FormData();
-      formImageData.append("file", e.target.files[0]);
-
-      axios
-        .post(`${serverUrl}:8080/api/post/thumbnail-upload`, formImageData, {
-          "Content-Type": "multipart/form-data",
-        })
-        .then((response) => {
-          setFormData({ ...formData, thumbnail: response.data });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }, []);
-
-    const onUploadImageButtonClick = useCallback(() => {
-      if (!inputRef.current) {
-        return;
-      }
-      inputRef.current.click();
-    }, []);
-
-    const onDeleteImage = useCallback((e) => {
-      // if (!e.target.files) {
-      //     return;
-      // }
-
-      axios
-        .get(`${serverUrl}:8080/api/post/thumbnail-delete/${id}`, {
-          "Content-Type": "multipart/form-data",
-        })
-        .then((response) => {
-          setFormData({
-            ...formData,
-            thumbnail: `${serverUrl}:8080/thumbnail/white.jpg`,
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }, []);
-
-    return (
-      <FormControl>
-        <Flex gap={"2"} align={"center"}>
-          <Input
-            type="file"
-            onChange={onUploadImage}
-            accept="image/*"
-            ref={inputRef}
-            style={{ display: "none" }}
-            name="thumbnail"
-          />
-          <Button
-            size={"sm"}
-            label="이미지업로드"
-            onClick={onUploadImageButtonClick}
-            colorScheme={"blue"}
-          >
-            +
-          </Button>
-          <Button
-            size={"sm"}
-            label="이미지업로드"
-            onClick={onDeleteImage}
-            colorScheme={"red"}
-          >
-            -
-          </Button>
-          <Input
-            focusBorderColor="green"
-            size={"sm"}
-            colorScheme={"green"}
-            varient="filled"
-            isReadOnly={true}
-            value={formData.thumbnail}
-          />
-        </Flex>
-        {/*<Button label="이미지 제거" onClick={onDeleteImage} />*/}
-      </FormControl>
-    );
+  const handleThumbnailChange = (thumbnailUrl) => {
+    setFormData({ ...formData, thumbnail: thumbnailUrl });
   };
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -223,6 +141,7 @@ function UpdatePostPage() {
       console.error(e);
     }
   }
+
   function BasicUsage() {
     const { isOpen, onOpen, onClose } = useDisclosure();
     return (
@@ -264,6 +183,7 @@ function UpdatePostPage() {
       </>
     );
   }
+
   return (
     <SubTemplate
       pageTitle={writePost.contentTitle + "   (EDITING)"}
@@ -304,7 +224,10 @@ function UpdatePostPage() {
                       name="content"
                     />
                   </FormControl>
-                  <SettingUserThumbnail />
+                  <ThumbnailUpload
+                    value={formData.thumbnail}
+                    onChange={handleThumbnailChange}
+                  />
                 </Flex>
                 <Flex
                   style={{
@@ -324,9 +247,6 @@ function UpdatePostPage() {
                 </Flex>
               </form>
             </Box>
-          </TabPanel>
-          <TabPanel>
-            <ImageForm tag={2} postValue={writePost} />
           </TabPanel>
           <TabPanel>
             <MarkdownForm tag={3} postValue={writePost} />

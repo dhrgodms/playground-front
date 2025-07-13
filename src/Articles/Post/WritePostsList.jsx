@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Flex, SimpleGrid, Skeleton } from "@chakra-ui/react";
+import { Flex, Skeleton, VStack } from "@chakra-ui/react";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { PostCard } from "../../Components/PostCard";
+import { serverUrlV2 } from "../../Constants/Constants";
 import MainTemplate from "../../Templates/MainTemplate";
-import serverUrl, { serverUrlV2 } from "../../Constants/Constants";
 
 const WritePostsList = () => {
     const [writePosts, setWritePosts] = useState([
@@ -24,14 +24,11 @@ const WritePostsList = () => {
         <MainTemplate pageTitle={"글 모음"} titleQuery={"글"}>
             <Flex height={"100vh"} style={{ flexDirection: "column" }}>
                 <Skeleton isLoaded={isLoaded} fadeDuration={1}>
-                    <SimpleGrid
-                        spacing={4}
-                        templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
-                    >
+                    <VStack spacing={4} align="stretch">
                         {writePosts.map((item) =>
                             <PostCard key={item.id} post={item} />
                         )}
-                    </SimpleGrid>
+                    </VStack>
                 </Skeleton>
             </Flex>
         </MainTemplate>

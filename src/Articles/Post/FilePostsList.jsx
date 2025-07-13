@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Flex, SimpleGrid, Skeleton } from "@chakra-ui/react";
+import { Flex, Skeleton, VStack } from "@chakra-ui/react";
 import axios from "axios";
-import MainTemplate from "../../Templates/MainTemplate";
+import React, { useEffect, useState } from "react";
 import { PostCard } from "../../Components/PostCard";
 import { serverUrlV2 } from "../../Constants/Constants";
+import MainTemplate from "../../Templates/MainTemplate";
 
 const FilePostsList = () => {
     const [filePosts, setFilePosts] = useState([
@@ -24,14 +24,11 @@ const FilePostsList = () => {
         <MainTemplate pageTitle={"File Post List Testpage"} titleQuery={"파일"}>
             <Flex height={"100vh"} style={{ flexDirection: "column" }}>
                 <Skeleton isLoaded={isLoaded} fadeDuration={1}>
-                    <SimpleGrid
-                        spacing={4}
-                        templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
-                    >
+                    <VStack spacing={4} align="stretch">
                         {filePosts.map((item) => (
                             <PostCard key={item.id} post={item} />
                         ))}
-                    </SimpleGrid>
+                    </VStack>
                 </Skeleton>
             </Flex>
         </MainTemplate>

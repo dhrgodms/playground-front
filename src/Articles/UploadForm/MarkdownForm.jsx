@@ -1,6 +1,4 @@
-import React, { useCallback, useRef, useState, useEffect } from "react";
-import MDEditor from "@uiw/react-md-editor";
-import axios from "axios";
+import { ArrowUpIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -8,12 +6,16 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Text,
-  useToast,
+  Select,
+  useToast
 } from "@chakra-ui/react";
-import { ArrowUpIcon } from "@chakra-ui/icons";
+import MDEditor from "@uiw/react-md-editor";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
+import ThumbnailUpload from "../../Atoms/ThumbnailUpload";
+import { categories, serverUrlV2 } from "../../Constants/Constants";
+
 export default function MarkdownForm({ tag, postValue }) {
   const toast = useToast();
   const navigate = useNavigate();
@@ -22,8 +24,9 @@ export default function MarkdownForm({ tag, postValue }) {
     content_title: postValue ? postValue.contentTitle : "",
     content: postValue ? postValue.content : "내용!",
     thumbnail: postValue ? postValue.thumbnail : "",
+    categoryId: postValue ? postValue.categoryId : 1, // 기본값: 생각글
     // tag : 1=글, 2=그림, 3=MD파일
-    tag: 3
+    tag: 1
   });
 
   // postValue가 변경될 때 formData 업데이트
@@ -34,10 +37,12 @@ export default function MarkdownForm({ tag, postValue }) {
         content_title: postValue.contentTitle || "",
         content: postValue.content || "내용!",
         thumbnail: postValue.thumbnail || "",
+        categoryId: postValue.categoryId || 1,
         tag: 3
       });
     }
   }, [postValue]);
+
   const [value, setValue] = React.useState(postValue ? "**로딩 중...**" : "**Hello world!!!**");
 
   // 클립보드 이미지 붙여넣기 처리
@@ -223,135 +228,47 @@ export default function MarkdownForm({ tag, postValue }) {
     setFormData({ ...formData, [name]: value });
   }
 
-  const SettingUserThumbnail = () => {
-    const inputRef = useRef(null);
-    const onUploadImage = useCallback((e) => {
-      if (!e.target.files) {
-        return;
-      }
-
-      const formImageData = new FormData();
-      formImageData.append("file", e.target.files[0]);
-
-      axios
-        .post(`${serverUrl}:8080/api/post/thumbnail-upload`, formImageData, {
-          "Content-Type": "multipart/form-data",
-        })
-        .then((response) => {
-          setFormData({ ...formData, thumbnail: response.data });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }, []);
-
-    const onUploadImageButtonClick = useCallback(() => {
-      if (!inputRef.current) {
-        return;
-      }
-      inputRef.current.click();
-    }, []);
-
-    return (
-      <FormControl>
-        <Flex gap={"3"} align={"center"}>
-          <Input
-            type="file"
-            onChange={onUploadImage}
-            accept="image/*"
-            ref={inputRef}
-            style={{ display: "none" }}
-            name="thumbnail"
-          />
-          <Button
-            size={"sm"}
-            label="이미지업로드"
-            onClick={onUploadImageButtonClick}
-          >
-            +Thumbnail
-          </Button>
-          <Input
-            focusBorderColor="green"
-            size={"sm"}
-            colorScheme={"green"}
-            varient="filled"
-            isReadOnly={true}
-            value={formData.thumbnail}
-          />
-        </Flex>
-        {/*<Button label="이미지 제거" onClick={onDeleteImage} />*/}
-      </FormControl>
-    );
+  const handleThumbnailChange = (thumbnailUrl) => {
+    setFormData({ ...formData, thumbnail: thumbnailUrl });
   };
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      // MD 내용을 직접 content로 사용
-      const markdownContent = value;
+      // MD 파일이 아닌 경우 content 필드에 마크다운 내용 저장
+      const postData = {
+        userId: formData.user_id,
+        contentTitle: formData.content_title,
+        content: value, // MD 에디터의 내용을 content에 저장
+        thumbnail: formData.thumbnail,
+        categoryId: formData.categoryId,
+        tag: formData.tag
+      };
 
-      // 4. 게시글 등록 또는 수정
-      if (postValue && postValue.id) {
+      if (postValue?.id) {
         // 수정 모드
-        const res = await axios.put(`${serverUrlV2}/posts/${postValue.id}`, {
-          id: postValue.id,
-          contentTitle: formData.content_title,
-          content: markdownContent,
-          thumbnail: formData.thumbnail,
-          tag: 3, // MD 파일 태그
+        await axios.put(`${serverUrlV2}/posts/${postValue.id}`, postData);
+        toast({
+          title: "수정 완료!",
+          status: "success",
+          isClosable: true,
         });
-
-        if (res?.data) {
-          toast({
-            title: `수정 완료`,
-            status: "success",
-            isClosable: true,
-          });
-          // 수정 후 해당 게시글 페이지로 이동
-          setTimeout(() => {
-            navigate(`/post/${postValue.id}`);
-          }, 1000);
-        } else {
-          toast({
-            title: `수정 실패`,
-            status: "error",
-            isClosable: true,
-          });
-        }
+        navigate(`/post/${postValue.id}`);
       } else {
-        // 새 게시글 작성 모드
-        const res = await axios.post(`${serverUrlV2}/posts`, {
-          contentTitle: formData.content_title,
-          content: markdownContent,
-          thumbnail: formData.thumbnail,
-          tag: 3, // MD 파일 태그
+        // 새로 작성 모드
+        await axios.post(`${serverUrlV2}/posts`, postData);
+        toast({
+          title: "업로드 완료!",
+          status: "success",
+          isClosable: true,
         });
-
-        if (res?.data) {
-          toast({
-            title: `업로드 완료`,
-            status: "success",
-            isClosable: true,
-          });
-          navigate("/");
-        } else {
-          toast({
-            title: `업로드 실패`,
-            status: "error",
-            isClosable: true,
-          });
-        }
+        navigate("/");
       }
-
-      setFormData({
-        user_id: "",
-        content_title: "",
-        content: "",
-        thumbnail: "",
-      });
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       toast({
-        title: `오류가 발생했습니다`,
+        title: "업로드 실패",
+        description: error.message || "알 수 없는 오류가 발생했습니다.",
         status: "error",
         isClosable: true,
       });
@@ -372,23 +289,38 @@ export default function MarkdownForm({ tag, postValue }) {
               placeholder="..OㅅO.."
               onChange={handleInputChange}
               name="content_title"
-              value={formData.content_title}
+              value={formData && formData.content_title}
             />
           </FormControl>
+
           <FormControl>
-            <FormLabel>Content</FormLabel>
-            <Text fontSize="sm" color="gray.600" mb={2}>
-              💡 팁: 이미지를 복사한 후 Ctrl+V(붙여넣기)를 하면 자동으로 업로드됩니다!
-            </Text>
-            <div className="container" data-color-mode="light">
-              <MDEditor
-                value={value}
-                onChange={setValue}
-                height={500}
-              />
-            </div>
+            <FormLabel>Category</FormLabel>
+            <Select
+              value={formData.categoryId}
+              onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
+            >
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </Select>
           </FormControl>
-          <SettingUserThumbnail />
+
+          <ThumbnailUpload
+            value={formData.thumbnail}
+            onChange={handleThumbnailChange}
+          />
+
+          <FormControl isRequired>
+            <FormLabel>Content</FormLabel>
+            <MDEditor
+              value={value}
+              onChange={setValue}
+              height={400}
+              preview="edit"
+            />
+          </FormControl>
         </Flex>
         <Flex
           style={{
@@ -397,8 +329,8 @@ export default function MarkdownForm({ tag, postValue }) {
             gap: "10px",
           }}
         >
-          <Button type="sumbit" colorScheme="yellow">
-            {postValue && postValue.id ? "수정" : "업로드"} <ArrowUpIcon />
+          <Button type="submit" colorScheme="yellow">
+            SAVE <ArrowUpIcon />
           </Button>
         </Flex>
       </form>

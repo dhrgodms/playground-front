@@ -1,23 +1,24 @@
+import { ArrowUpIcon, CloseIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Flex,
   FormControl,
   FormLabel,
+  HStack,
+  IconButton,
   Input,
+  Progress,
+  Text,
   Textarea,
   useToast,
   VStack,
-  HStack,
-  Text,
-  IconButton,
-  Progress,
 } from "@chakra-ui/react";
-import { ArrowUpIcon, CloseIcon } from "@chakra-ui/icons";
-import React, { useCallback, useRef, useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
+import ThumbnailUpload from "../../Atoms/ThumbnailUpload";
+import { serverUrlV2 } from "../../Constants/Constants";
 
 export const FileForm = ({ tag }) => {
   const toast = useToast();
@@ -47,6 +48,10 @@ export const FileForm = ({ tag }) => {
 
   const removeFile = (index) => {
     setFileList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleThumbnailChange = (thumbnailUrl) => {
+    setFormData({ ...formData, thumbnail: thumbnailUrl });
   };
 
   // presigned URL 요청
@@ -147,62 +152,6 @@ export const FileForm = ({ tag }) => {
     }
   }
 
-  const SettingUserThumbnail = () => {
-    const inputRef = useRef(null);
-    const onUploadImage = useCallback((e) => {
-      if (!e.target.files) {
-        return;
-      }
-      const formImageData = new FormData();
-      formImageData.append("file", e.target.files[0]);
-      axios
-        .post(`${serverUrl}:8080/api/post/thumbnail-upload`, formImageData, {
-          "Content-Type": "multipart/form-data",
-        })
-        .then((response) => {
-          setFormData({ ...formData, thumbnail: response.data });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }, []);
-    const onUploadImageButtonClick = useCallback(() => {
-      if (!inputRef.current) {
-        return;
-      }
-      inputRef.current.click();
-    }, []);
-    return (
-      <FormControl>
-        <Flex gap={"3"} align={"center"}>
-          <Input
-            type="file"
-            onChange={onUploadImage}
-            accept="image/*"
-            ref={inputRef}
-            style={{ display: "none" }}
-            name="thumbnail"
-          />
-          <Button
-            size={"sm"}
-            label="이미지업로드"
-            onClick={onUploadImageButtonClick}
-          >
-            +Thumbnail
-          </Button>
-          <Input
-            focusBorderColor="green"
-            size={"sm"}
-            colorScheme={"green"}
-            varient="filled"
-            isReadOnly={true}
-            value={formData.thumbnail}
-          />
-        </Flex>
-      </FormControl>
-    );
-  };
-
   return (
     <Box my={4} textAlign="left">
       <form
@@ -231,7 +180,11 @@ export const FileForm = ({ tag }) => {
               value={formData && formData.content}
             />
           </FormControl>
-          <SettingUserThumbnail />
+          <ThumbnailUpload
+            value={formData.thumbnail}
+            onChange={handleThumbnailChange}
+            disabled={isUploading}
+          />
           <FormControl>
             <FormLabel>파일 첨부</FormLabel>
             <VStack spacing={3} align="stretch">

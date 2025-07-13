@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Flex, SimpleGrid } from '@chakra-ui/react';
+import { Flex, VStack } from '@chakra-ui/react';
 import axios from "axios";
+import React, { useEffect, useState } from 'react';
 import { PostCard } from "../../Components/PostCard";
+import { serverUrlV2 } from "../../Constants/Constants";
 import MainTemplate from "../../Templates/MainTemplate";
-import serverUrl, { serverUrlV2 } from "../../Constants/Constants";
 
 const AllPostsList = () => {
     const [writePosts, setWritePosts] = useState([{ id: 1, postListTile: '꾸잉', postNo: 1 }]);
@@ -14,15 +14,12 @@ const AllPostsList = () => {
     return (
         <MainTemplate pageTitle={'모두 모아보기'} titleQuery={'모두'}>
             <Flex height={'100vh'} style={{ flexDirection: 'column' }}>
-                <SimpleGrid
-                    spacing={4}
-                    templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
-                >
+                <VStack spacing={4} align="stretch">
                     {console.log(writePosts)}
                     {writePosts.map(item => (
                         <PostCard key={item.id} post={item} />
                     ))}
-                </SimpleGrid>
+                </VStack>
             </Flex>
         </MainTemplate>
     );

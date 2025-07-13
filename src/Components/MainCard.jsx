@@ -1,17 +1,21 @@
-import {
-  Card,
-  CardHeader,
-  CardFooter,
-  Image,
-  Heading,
-  Text,
-  Flex,
-  Box, Tag, TagLeftIcon, TagLabel, HStack,
-} from '@chakra-ui/react';
-import { useNavigate } from "react-router-dom";
-import React from "react";
 import { ChatIcon, ViewIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Card,
+  CardFooter,
+  CardHeader,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Tag,
+  TagLabel,
+  TagLeftIcon,
+  Text,
+} from '@chakra-ui/react';
+import React from "react";
 import { AiFillHeart } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 export const MainCard = ({ ListTitle, post }) => {
   const navigate = useNavigate();
@@ -36,11 +40,23 @@ export const MainCard = ({ ListTitle, post }) => {
           </Flex>
         </Flex>
       </CardHeader>
-      <Image
-        objectFit="cover"
-        src={post?.thumbnail}
-        alt="Chakra UI"
-      />
+
+      {/* 고정된 크기의 이미지 컨테이너 */}
+      <Box
+        width="100%"
+        height="200px"
+        position="relative"
+        overflow="hidden"
+      >
+        <Image
+          src={post?.thumbnail}
+          alt="썸네일"
+          width="100%"
+          height="100%"
+          objectFit="cover"
+          objectPosition="center"
+        />
+      </Box>
 
       <CardFooter
         justify="center"
