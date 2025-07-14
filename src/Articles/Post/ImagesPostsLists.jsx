@@ -123,7 +123,7 @@ const ImagesPostsLists = () => {
                     colorScheme="yellow"
                     variant="ghost"
                     rightIcon={<ArrowForwardIcon />}
-                    onClick={() => window.location.href = '/upload'}
+                    onClick={() => window.location.href = '/admin/upload'}
                     _hover={{ bg: '#F7DC6F' }}
                     fontFamily="monospace"
                     fontWeight="medium"

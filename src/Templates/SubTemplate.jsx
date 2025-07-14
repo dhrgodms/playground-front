@@ -13,20 +13,47 @@ import {
     Flex,
     Heading,
     IconButton,
-    Text,
+    Skeleton,
     useDisclosure,
-    VStack,
+    VStack
 } from "@chakra-ui/react";
-import React, { Children, useState } from "react";
+import axios from 'axios';
+import React, { Children, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageTitle } from "../Atoms/PageTitle";
+import { serverUrlV2 } from '../Constants/Constants';
 
 const SubSlider = () => {
     const [mainPostsdata, setMainPostsdata] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const btnRef = React.useRef();
+
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        try {
+            const response = await axios.get(`${serverUrlV2}/categories`);
+            setCategories(response.data);
+            setIsCategoriesLoaded(true);
+        } catch (error) {
+            console.error('카테고리 로드 실패:', error);
+            // 카테고리 API가 없을 경우 기본 카테고리 사용
+            setCategories([
+                { id: 1, name: "생각글", description: "생각과 고민을 나누는 글", color: "#3498DB", path: "/writes", icon: "💭" },
+                { id: 2, name: "일상만화", description: "만화와 그림 관련 글", color: "#E74C3C", path: "/toons", icon: "🎨" },
+                { id: 3, name: "마크다운", description: "마크다운 파일", color: "#9B59B6", path: "/lists", icon: "📁" },
+                { id: 4, name: "파일", description: "다양한 파일들", color: "#95A5A6", path: "/files", icon: "📄" },
+                { id: 5, name: "플레이리스트", description: "음악 플레이리스트", color: "#F39C12", path: "/playlists", icon: "🎵" }
+            ]);
+            setIsCategoriesLoaded(true);
+        }
+    };
 
     return (
         <>
@@ -67,7 +94,7 @@ const SubSlider = () => {
                                 onClick={() => navigate("/")}
                                 _hover={{ bg: '#F4D03F' }}
                             >
-                                메인으로
+                                🏠 메인으로
                             </Button>
                             <Button
                                 ref={btnRef}
@@ -78,7 +105,7 @@ const SubSlider = () => {
                                 onClick={() => navigate(`/post/${mainPostsdata[0]?.id}`)}
                                 _hover={{ bg: '#F4D03F' }}
                             >
-                                인기글
+                                🔥 인기글
                             </Button>
                             <Button
                                 ref={btnRef}
@@ -89,51 +116,54 @@ const SubSlider = () => {
                                 onClick={() => navigate(`/post/${mainPostsdata[1]?.id}`)}
                                 _hover={{ bg: '#F4D03F' }}
                             >
-                                최신글
+                                📝 최신글
                             </Button>
+
+                            <Divider borderColor="#E2E8F0" />
+
+                            <Skeleton isLoaded={isCategoriesLoaded}>
+                                <VStack spacing={2} align="stretch">
+                                    {categories.map((category) => (
+                                        <Button
+                                            key={category.id}
+                                            ref={btnRef}
+                                            colorScheme="yellow"
+                                            variant={"ghost"}
+                                            bg="#F7DC6F"
+                                            color="#4A5568"
+                                            onClick={() => navigate(category.path)}
+                                            _hover={{ bg: '#F4D03F' }}
+                                            justifyContent="flex-start"
+                                        >
+                                            {category.icon || "📁"} {category.name}
+                                        </Button>
+                                    ))}
+                                </VStack>
+                            </Skeleton>
+
+                            <Divider borderColor="#E2E8F0" />
+
                             <Button
                                 ref={btnRef}
-                                colorScheme="yellow"
+                                colorScheme="gray"
                                 variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#4A5568"
-                                onClick={() => navigate(`/writes`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                생각글
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#4A5568"
-                                onClick={() => navigate(`/toons`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                일상만화
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#4A5568"
-                                onClick={() => navigate(`/lists`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                md files
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#4A5568"
+                                bg="#6B7280"
+                                color="white"
                                 onClick={() => navigate("/guestbook")}
-                                _hover={{ bg: '#F4D03F' }}
+                                _hover={{ bg: '#4B5563' }}
                             >
-                                어서오세요 방명록
+                                📮 어서오세요 방명록
+                            </Button>
+                            <Button
+                                ref={btnRef}
+                                colorScheme="gray"
+                                variant={"ghost"}
+                                bg="#6B7280"
+                                color="white"
+                                onClick={() => navigate("/admin")}
+                                _hover={{ bg: '#4B5563' }}
+                            >
+                                🔧 어드민
                             </Button>
                         </Flex>
                     </DrawerBody>
@@ -159,15 +189,36 @@ const SubSlider = () => {
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [categories, setCategories] = useState([]);
+    const [isCategoriesLoaded, setIsCategoriesLoaded] = useState(false);
+
+    useEffect(() => {
+        loadCategories();
+    }, []);
+
+    const loadCategories = async () => {
+        try {
+            const response = await axios.get(`${serverUrlV2}/categories`);
+            setCategories(response.data);
+            setIsCategoriesLoaded(true);
+        } catch (error) {
+            console.error('카테고리 로드 실패:', error);
+            // 카테고리 API가 없을 경우 기본 카테고리 사용
+            setCategories([
+                { id: 1, name: "생각글", description: "생각과 고민을 나누는 글", color: "#3498DB", path: "/writes", icon: "💭" },
+                { id: 2, name: "일상만화", description: "만화와 그림 관련 글", color: "#E74C3C", path: "/toons", icon: "🎨" },
+                { id: 3, name: "마크다운", description: "마크다운 파일", color: "#9B59B6", path: "/lists", icon: "📁" },
+                { id: 4, name: "파일", description: "다양한 파일들", color: "#95A5A6", path: "/files", icon: "📄" },
+                { id: 5, name: "플레이리스트", description: "음악 플레이리스트", color: "#F39C12", path: "/playlists", icon: "🎵" }
+            ]);
+            setIsCategoriesLoaded(true);
+        }
+    };
 
     const menuItems = [
         { name: "메인으로", path: "/", icon: "🏠" },
         { name: "인기글", path: "/post/1", icon: "🔥" },
         { name: "최신글", path: "/post/2", icon: "📝" },
-        { name: "생각글", path: "/writes", icon: "💭" },
-        { name: "일상만화", path: "/toons", icon: "🎨" },
-        { name: "md files", path: "/lists", icon: "📁" },
-        { name: "방명록", path: "/guestbook", icon: "📮" },
     ];
 
     return (
@@ -190,39 +241,68 @@ const Sidebar = () => {
                     🆗 Haeeun.zip
                 </Heading>
 
-                <VStack spacing={2} align="stretch">
-                    {menuItems.map((item, index) => (
+                <VStack spacing={4} align="stretch">
+                    {menuItems.map((item) => (
                         <Button
-                            key={index}
+                            key={item.path}
                             variant="ghost"
                             justifyContent="flex-start"
-                            h="auto"
-                            py={3}
-                            px={4}
+                            color={location.pathname === item.path ? "#2C3E50" : "#6B7280"}
                             bg={location.pathname === item.path ? "#F7DC6F" : "transparent"}
-                            color={location.pathname === item.path ? "#2C3E50" : "#4A5568"}
-                            _hover={{ bg: location.pathname === item.path ? "#F4D03F" : "#F8F9FA" }}
+                            _hover={{ bg: "#F7DC6F" }}
                             onClick={() => navigate(item.path)}
-                            borderRadius="md"
-                            fontWeight="medium"
-                            fontSize={{ base: "sm", lg: "md" }}
+                            fontFamily="monospace"
                         >
-                            <Text mr={3} fontSize="lg">{item.icon}</Text>
-                            {item.name}
+                            {item.icon} {item.name}
                         </Button>
                     ))}
+
+                    <Divider borderColor="#E2E8F0" />
+
+                    <Skeleton isLoaded={isCategoriesLoaded}>
+                        <VStack spacing={2} align="stretch">
+                            {categories.map((category) => (
+                                <Button
+                                    key={category.id}
+                                    variant="ghost"
+                                    justifyContent="flex-start"
+                                    color={location.pathname === category.path ? "#2C3E50" : "#6B7280"}
+                                    bg={location.pathname === category.path ? "#F7DC6F" : "transparent"}
+                                    _hover={{ bg: "#F7DC6F" }}
+                                    onClick={() => navigate(category.path)}
+                                    fontFamily="monospace"
+                                >
+                                    {category.icon || "📁"} {category.name}
+                                </Button>
+                            ))}
+                        </VStack>
+                    </Skeleton>
+
+                    <Divider borderColor="#E2E8F0" />
+
+                    <Button
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        color={location.pathname === "/guestbook" ? "#2C3E50" : "#6B7280"}
+                        bg={location.pathname === "/guestbook" ? "#F7DC6F" : "transparent"}
+                        _hover={{ bg: "#F7DC6F" }}
+                        onClick={() => navigate("/guestbook")}
+                        fontFamily="monospace"
+                    >
+                        📮 어서오세요 방명록
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        color={location.pathname === "/admin" ? "#2C3E50" : "#6B7280"}
+                        bg={location.pathname === "/admin" ? "#F7DC6F" : "transparent"}
+                        _hover={{ bg: "#F7DC6F" }}
+                        onClick={() => navigate("/admin")}
+                        fontFamily="monospace"
+                    >
+                        🔧 어드민
+                    </Button>
                 </VStack>
-
-                <Divider my={6} borderColor="#E2E8F0" />
-
-                <Box>
-                    <Text fontSize="sm" color="#718096" mb={2}>
-                        About
-                    </Text>
-                    <Text fontSize="xs" color="#4A5568" lineHeight="1.6">
-                        개인 블로그입니다. 생각글, 일상만화, 마크다운 파일들을 공유합니다.
-                    </Text>
-                </Box>
             </Box>
         </Box>
     );

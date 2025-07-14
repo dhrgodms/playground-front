@@ -48,7 +48,7 @@ export const Slider = () => {
                     colorScheme="yellow"
                     bg="#F7DC6F"
                     color="#4A5568"
-                    onClick={() => navigate("/upload")}
+                    onClick={() => navigate("/admin/upload")}
                     _hover={{ bg: '#F4D03F', transform: 'scale(1.05)' }}
                 >
                     UPLOAD
@@ -127,14 +127,25 @@ export const Slider = () => {
                             </Button>
                             <Button
                                 ref={btnRef}
-                                colorScheme="yellow"
+                                colorScheme="gray"
                                 variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#2C3E50"
+                                bg="#6B7280"
+                                color="white"
                                 onClick={() => navigate("/guestbook")}
-                                _hover={{ bg: '#F4D03F' }}
+                                _hover={{ bg: '#4B5563' }}
                             >
                                 어서오세요 방명록
+                            </Button>
+                            <Button
+                                ref={btnRef}
+                                colorScheme="gray"
+                                variant={"ghost"}
+                                bg="#6B7280"
+                                color="white"
+                                onClick={() => navigate("/admin")}
+                                _hover={{ bg: '#4B5563' }}
+                            >
+                                🔧 어드민
                             </Button>
                         </Flex>
                     </DrawerBody>

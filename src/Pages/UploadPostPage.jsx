@@ -12,44 +12,44 @@ import SubTemplate from "../Templates/SubTemplate";
 
 function UploadForm() {
     return (
-        <Tabs variant='soft-rounded' colorScheme='yellow'>
-            <TabList bg="#F8F9FA" borderRadius="md" p={1}>
+        <Tabs variant='soft-rounded' colorScheme='gray'>
+            <TabList bg="#F9FAFB" borderRadius="md" p={1}>
                 <Tab
                     _selected={{
-                        bg: '#F7DC6F',
-                        color: '#4A5568',
+                        bg: '#6B7280',
+                        color: 'white',
                         fontWeight: 'bold'
                     }}
-                    color="#4A5568"
+                    color="#6B7280"
                 >
                     .md
                 </Tab>
                 <Tab
                     _selected={{
-                        bg: '#F7DC6F',
-                        color: '#4A5568',
+                        bg: '#6B7280',
+                        color: 'white',
                         fontWeight: 'bold'
                     }}
-                    color="#4A5568"
+                    color="#6B7280"
                 >
                     Files
                 </Tab>
             </TabList>
             <TabPanels>
                 <TabPanel>
-                    <MarkdownForm categoryId={3} />
+                    <MarkdownForm redirectTo="/admin" />
                 </TabPanel>
                 <TabPanel>
-                    <FileForm categoryId={4} />
+                    <FileForm redirectTo="/admin" />
                 </TabPanel>
             </TabPanels>
         </Tabs>
     );
 }
 
-const UploadPostPage = () => {
+function UploadPostPage() {
     return (
-        <SubTemplate titleQuery={"uploadform"} pageTitle={"uploadform"}>
+        <SubTemplate pageTitle="게시글 작성" titleQuery="작성">
             <UploadForm />
         </SubTemplate>
     );

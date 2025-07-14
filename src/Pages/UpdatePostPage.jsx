@@ -1,10 +1,8 @@
-import { ArrowUpIcon, DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Flex,
-  FormControl,
-  FormLabel,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,21 +10,15 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   Text,
-  Textarea,
   useDisclosure,
-  useToast,
+  useToast
 } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { FileForm } from "../Articles/UploadForm/FileForm";
 import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
-import ThumbnailUpload from "../Atoms/ThumbnailUpload";
 import { serverUrl, serverUrlV2 } from "../Constants/Constants";
 import SubTemplate from "../Templates/SubTemplate";
 
@@ -48,13 +40,11 @@ function UpdatePostPage() {
   });
   const toast = useToast();
 
-  const [formData, setFormData] = useState({
-    user_id: 1,
-    contentTitle: writePost.contentTitle,
-    content: writePost.content,
-    thumbnail: writePost.thumbnail,
-  });
+
   const navigate = useNavigate();
+
+  // Check if we came from admin page
+  const isFromAdmin = window.location.pathname.includes('/admin/update');
 
   // 1. id가 바뀔 때만 게시글 fetch
   useEffect(() => {
@@ -68,15 +58,7 @@ function UpdatePostPage() {
     }
   }, [id]);
 
-  // 2. writePost가 바뀔 때만 formData 세팅
-  useEffect(() => {
-    setFormData({
-      user_id: 1,
-      contentTitle: writePost.contentTitle,
-      content: writePost.content,
-      thumbnail: writePost.thumbnail,
-    });
-  }, [writePost]);
+
 
   function onDeletePost() {
     axios
@@ -88,58 +70,10 @@ function UpdatePostPage() {
           duration: 9000,
           isClosable: true,
         });
-        navigate("/writes");
+        // If we came from admin page, redirect back to admin, otherwise go to writes
+        navigate(isFromAdmin ? '/admin' : "/writes");
       })
       .catch((error) => console.log(error));
-  }
-
-  function handleInputChange(event) {
-    const { name, value } = event.target;
-    setFormData({ ...formData, [name]: value });
-  }
-
-  const handleThumbnailChange = (thumbnailUrl) => {
-    setFormData({ ...formData, thumbnail: thumbnailUrl });
-  };
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      axios
-        .put(`${serverUrlV2}/posts/${id}`, {
-          id: id,
-          contentTitle: formData.contentTitle,
-          content: formData.content,
-          thumbnail: formData.thumbnail,
-          categoryId: writePost.categoryId,
-          fileUrls: writePost.fileUrls,
-        })
-        .then((res) => {
-          setFormData({
-            user_id: "",
-            contentTitle: "",
-            content: "",
-            thumbnail: "",
-            fileUrls: [],
-          });
-          if (res?.data) {
-            toast({
-              title: `수정, 성공적.`,
-              status: "success",
-              isClosable: true,
-            });
-            navigate(`/post/${id}`);
-          } else {
-            toast({
-              title: `수정 실패`,
-              status: "error",
-              isClosable: true,
-            });
-          }
-        });
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   function BasicUsage() {
@@ -147,11 +81,12 @@ function UpdatePostPage() {
     return (
       <>
         <Button
-          colorScheme={"blue"}
-          style={{ marginTop: "4.5rem" }}
+          colorScheme={"red"}
+          variant="outline"
           onClick={onOpen}
+          leftIcon={<DeleteIcon />}
         >
-          <DeleteIcon />
+          삭제
         </Button>
 
         <Modal isOpen={isOpen} onClose={onClose}>
@@ -160,7 +95,7 @@ function UpdatePostPage() {
             <ModalHeader>정말 삭제하시겠습니까?</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Lorem count={2} />
+              <Text>이 게시글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</Text>
             </ModalBody>
 
             <ModalFooter gap={3}>
@@ -184,75 +119,42 @@ function UpdatePostPage() {
     );
   }
 
+  // Determine which form component to use based on post tag
+  const renderFormComponent = () => {
+    const tag = writePost.tag || 1;
+
+    if (tag === 4) {
+      // File posts - use FileForm
+      return (
+        <FileForm
+          tag={tag}
+          postValue={writePost}
+          redirectTo={isFromAdmin ? '/admin' : undefined}
+        />
+      );
+    } else {
+      // All other posts (글, 그림, 마크다운) - use MarkdownForm
+      return (
+        <MarkdownForm
+          tag={tag}
+          postValue={writePost}
+          redirectTo={isFromAdmin ? '/admin' : undefined}
+        />
+      );
+    }
+  };
+
   return (
     <SubTemplate
       pageTitle={writePost.contentTitle + "   (EDITING)"}
       titleQuery={writePost.contentTitle}
     >
-      {console.log(formData)}
-      <Tabs variant="soft-rounded" colorScheme="yellow">
-        <TabList>
-          <Tab>글</Tab>
-          <Tab>그림</Tab>
-          <Tab>MD 파일</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <Box my={4} textAlign="left">
-              <form
-                onSubmit={handleSubmit}
-                style={{ flexDirection: "column", gap: "10px" }}
-              >
-                <Flex direction={"column"} justify={"center"} gap={"5"}>
-                  <FormControl isRequired>
-                    <FormLabel>Content Title</FormLabel>
-                    <Textarea
-                      focusBorderColor="green"
-                      type="text"
-                      defaultValue={formData && formData.contentTitle}
-                      onChange={handleInputChange}
-                      name="contentTitle"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Content</FormLabel>
-                    <Textarea
-                      focusBorderColor="green"
-                      type="text"
-                      defaultValue={formData && formData.content}
-                      onChange={handleInputChange}
-                      name="content"
-                    />
-                  </FormControl>
-                  <ThumbnailUpload
-                    value={formData.thumbnail}
-                    onChange={handleThumbnailChange}
-                  />
-                </Flex>
-                <Flex
-                  style={{
-                    flexDirection: "column",
-                    marginTop: "20px",
-                    gap: "10px",
-                  }}
-                >
-                  <Button
-                    type="sumbit"
-                    colorScheme="yellow"
-                    variant={"outline"}
-                  >
-                    SAVE <ArrowUpIcon />
-                  </Button>
-                  <BasicUsage />
-                </Flex>
-              </form>
-            </Box>
-          </TabPanel>
-          <TabPanel>
-            <MarkdownForm categoryId={3} postValue={writePost} />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+      <Box>
+        {renderFormComponent()}
+        <Flex justify="center" mt={6}>
+          <BasicUsage />
+        </Flex>
+      </Box>
     </SubTemplate>
   );
 }

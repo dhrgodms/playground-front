@@ -8,6 +8,7 @@ import GuestBook from './Articles/Post/GuestBook';
 import ImagesPostsLists from './Articles/Post/ImagesPostsLists';
 import MarkdownPostLists from './Articles/Post/MarkdownPostLists';
 import WritePostsList from './Articles/Post/WritePostsList';
+import AdminPage from "./Pages/AdminPage";
 import LoginPage from "./Pages/LoginPage";
 import MainPage from './Pages/MainPage';
 import SignUpPage from "./Pages/SignUpPage";
@@ -21,9 +22,9 @@ function App() {
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/post/:id" element={<DefaultPost />} />
-                <Route path="/upload" element={<UploadPostPage />} />
-                <Route path="/post/update/:id" element={<UpdatePostPage />} />
-                <Route path="/admin" element={<adminDefaultPost />} />
+                <Route path="/admin/upload" element={<UploadPostPage />} />
+                <Route path="/admin/update/:id" element={<UpdatePostPage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/writes" element={<WritePostsList />} />
                 <Route path="/toons" element={<ImagesPostsLists />} />
                 <Route path="/lists" element={<MarkdownPostLists />} />
