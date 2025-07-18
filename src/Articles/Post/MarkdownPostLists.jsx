@@ -11,12 +11,14 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { PostCard } from "../../Components/PostCard";
 import TagSystem from '../../Components/TagSystem';
 import { serverUrlV2 } from "../../Constants/Constants";
 import SubTemplate from "../../Templates/SubTemplate";
 
 const MarkdownPostLists = () => {
+    const { categoryId } = useParams();
     const [markdownPosts, setMarkdownPosts] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [selectedTags, setSelectedTags] = useState([]);
@@ -40,15 +42,13 @@ const MarkdownPostLists = () => {
 
     useEffect(() => {
         axios
-            .get(`${serverUrlV2}/posts?categoryId=3`)
+            .get(`${serverUrlV2}/posts`, { params: { category: categoryId } })
             .then((response) => {
-                const data = response.data.content;
-                setMarkdownPosts(data);
-                setFilteredPosts(data);
+                setMarkdownPosts(response.data.content);
                 setIsLoaded(true);
             })
             .catch((error) => console.log(error));
-    }, []);
+    }, [categoryId]);
 
     useEffect(() => {
         if (selectedTags.length === 0) {

@@ -131,11 +131,11 @@ const SubSlider = () => {
                                             variant={"ghost"}
                                             bg="#F7DC6F"
                                             color="#4A5568"
-                                            onClick={() => navigate(category.path)}
+                                            onClick={() => navigate(category.categoryPath)}
                                             _hover={{ bg: '#F4D03F' }}
                                             justifyContent="flex-start"
                                         >
-                                            {category.icon || "📁"} {category.name}
+                                            {category.categoryIcon || "📁"} {category.categoryName}
                                         </Button>
                                     ))}
                                 </VStack>

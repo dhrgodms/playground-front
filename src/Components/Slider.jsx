@@ -13,13 +13,28 @@ import {
     IconButton,
     useDisclosure,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { serverUrlV2 } from "../Constants/Constants";
 
 export const Slider = () => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const btnRef = React.useRef();
+    console.log("sslider 실행");
+
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios.get(`${serverUrlV2}/categories`)
+            .then(res => {
+                setCategories(res.data);
+                console.log(res.data);
+                console.log(categories);
+            })
+            .catch(err => console.error("카테고리 불러오기 실패", err));
+    }, []);
 
     const [mainPostsdata, setMainPostsdata] = useState([]);
 
@@ -92,39 +107,21 @@ export const Slider = () => {
                             >
                                 모둠글
                             </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#2C3E50"
-                                onClick={() => navigate(`/writes`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                생각글
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#2C3E50"
-                                onClick={() => navigate(`/toons`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                일상만화
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="yellow"
-                                variant={"ghost"}
-                                bg="#F7DC6F"
-                                color="#2C3E50"
-                                onClick={() => navigate(`/lists`)}
-                                _hover={{ bg: '#F4D03F' }}
-                            >
-                                내가 듣는 플레이리스트(Playlist)
-                            </Button>
+                            {/* 카테고리별 버튼 동적 렌더링 */}
+                            {categories.map((category) => (
+                                <Button
+                                    key={category.id}
+                                    ref={btnRef}
+                                    colorScheme="yellow"
+                                    variant={"ghost"}
+                                    bg="#F7DC6F"
+                                    color="#2C3E50"
+                                    onClick={() => navigate(`/category/${category.id}`)}
+                                    _hover={{ bg: '#F4D03F' }}
+                                >
+                                    {category.categoryName}
+                                </Button>
+                            ))}
                             <Button
                                 ref={btnRef}
                                 colorScheme="gray"

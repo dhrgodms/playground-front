@@ -33,6 +33,7 @@ function App() {
                 <Route path="/guestbook" element={<GuestBook />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/category/:categoryId" element={<MarkdownPostLists />} />
 
 
             </Routes>
