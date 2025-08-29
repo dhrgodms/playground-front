@@ -1,22 +1,17 @@
+import { ArrowUpIcon } from "@chakra-ui/icons";
 import {
-  Card,
-  CardBody,
-  CardHeader,
+  Box,
+  Button,
   Flex,
-  Heading,
-  IconButton,
   Input,
   Stack,
-  StackDivider,
   Text,
   Textarea,
   useToast,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import serverUrl from "../Constants/Constants";
 import React, { useState } from "react";
-import { ArrowUpIcon } from "@chakra-ui/icons";
 
 export default function CommentContainer({
   id,
@@ -38,33 +33,142 @@ export default function CommentContainer({
   }
 
   const CommentList = () => (
-    <Card>
-      <CardHeader pb={"0"}>
-        <Heading size="sm">Comments</Heading>
-      </CardHeader>
-      <CardBody>
-        <Stack divider={<StackDivider />} spacing="2">
-          {commentAll?.map((comment, index) => (
-            <Flex direction={"column"} key={index}>
-              <Heading size="xs" textTransform="uppercase">
+    <Box
+      bg="#F8F9FA"
+      p={3}
+      borderRadius="md"
+      borderWidth="1px"
+      borderColor="#E2E8F0"
+      color="#4A5568"
+      boxShadow="xs"
+      position="relative"
+      width="100%"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        right: '0',
+        height: '2px',
+        bg: '#2C3E50',
+        borderRadius: 'md md 0 0'
+      }}
+    >
+      <Flex justify="space-between" align="center" mb={3}>
+        <Text fontSize="sm" color="#2C3E50" fontFamily="monospace" fontWeight="medium">
+          💬 Comments ({commentAll?.length || 0})
+        </Text>
+      </Flex>
+      <Stack spacing="2" maxH="200px" overflowY="auto" mb={3}>
+        {commentAll?.map((comment, index) => (
+          <Box
+            key={index}
+            p={2}
+            border="1px solid"
+            borderColor="#E2E8F0"
+            borderRadius="sm"
+            bg="white"
+            width="100%"
+          >
+            <Flex justify="space-between" align="center" mb={1}>
+              <Text fontSize="xs" color="#2C3E50" fontFamily="monospace" fontWeight="medium">
                 {comment.memberName}
-              </Heading>
-              <Text pt="1" fontSize="xs">
-                {comment.content}
+              </Text>
+              <Text fontSize="xs" color="#718096">
+                #{index + 1}
               </Text>
             </Flex>
-          ))}
-        </Stack>
-      </CardBody>
-    </Card>
+            <Text fontSize="xs" color="#4A5568" whiteSpace="pre-wrap" width="100%">
+              {comment.content}
+            </Text>
+          </Box>
+        ))}
+        {(!commentAll || commentAll.length === 0) && (
+          <Text fontSize="xs" color="#718096" textAlign="center" py={2}>
+            첫 번째 댓글을 남겨보세요! 💭
+          </Text>
+        )}
+      </Stack>
+
+      <Box borderTop="1px solid" borderColor="#E2E8F0" pt={3} width="100%">
+        <VStack spacing={2} width="100%">
+          <Flex gap={2} width="100%">
+            <Input
+              name="commentNickname"
+              placeholder="닉네임"
+              value={commentData && commentData.commentNickname}
+              onChange={handleInputChange}
+              borderColor="#E2E8F0"
+              _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+              color="#4A5568"
+              size="xs"
+              bg="white"
+              flex="1"
+            />
+            <Input
+              name="commentPassword"
+              type="password"
+              placeholder="비밀번호"
+              value={commentData && commentData.commentPassword}
+              onChange={handleInputChange}
+              borderColor="#E2E8F0"
+              _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+              color="#4A5568"
+              size="xs"
+              bg="white"
+              flex="1"
+            />
+          </Flex>
+          <Flex gap={2} width="100%">
+            <Textarea
+              name="commentContent"
+              placeholder="댓글을 입력해주세요..."
+              value={commentData && commentData.commentContent}
+              onChange={handleInputChange}
+              borderColor="#E2E8F0"
+              _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+              color="#4A5568"
+              resize="vertical"
+              minH="40px"
+              maxH="80px"
+              size="xs"
+              bg="white"
+              flex="1"
+            />
+            <Button
+              onClick={handleCommentSubmit}
+              colorScheme="yellow"
+              bg="#F7DC6F"
+              color="#4A5568"
+              _hover={{ bg: '#F4D03F' }}
+              px={3}
+              height="auto"
+              alignSelf="flex-end"
+              size="xs"
+            >
+              <ArrowUpIcon />
+            </Button>
+          </Flex>
+        </VStack>
+      </Box>
+    </Box>
   );
 
   async function handleCommentSubmit(e) {
     e.preventDefault();
 
+    if (!commentData.commentNickname || !commentData.commentPassword || !commentData.commentContent) {
+      toast({
+        title: "모든 필드를 입력해주세요",
+        status: "warning",
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       axios
-        .post(`${serverUrl}:8080/api/comment/add`, {
+        .post(`http://localhost:8080/api/comment/add`, {
           memberName: commentData.commentNickname,
           memberPassword: commentData.commentPassword,
           content: commentData.commentContent,
@@ -80,13 +184,13 @@ export default function CommentContainer({
           setCommentAll([...commentAll, res.data]);
           if (res?.data) {
             toast({
-              title: `댓글 업로드 완료됐나벼`,
+              title: `댓글이 등록되었습니다! 💬`,
               status: "success",
               isClosable: true,
             });
           } else {
             toast({
-              title: `잉ㅠ실패`,
+              title: `댓글 등록에 실패했습니다`,
               status: "error",
               isClosable: true,
             });
@@ -94,42 +198,17 @@ export default function CommentContainer({
         });
     } catch (e) {
       console.error(e);
+      toast({
+        title: "댓글 등록에 실패했습니다",
+        status: "error",
+        isClosable: true,
+      });
     }
   }
 
   return (
-    <VStack height={"100vh"} style={{ flexDirection: "column" }}>
-      <VStack width={"75vw"} p={"5"} alignItems={"stretch"}>
-        <CommentList />
-        <Flex>
-          <Input
-            name="commentNickname"
-            placeholder={"귀여운 닉네임"}
-            value={commentData && commentData.commentNickname}
-            onChange={handleInputChange}
-          />
-          <Input
-            name="commentPassword"
-            placeholder={"비밀번호 486"}
-            value={commentData && commentData.commentPassword}
-            onChange={handleInputChange}
-          />
-        </Flex>
-        <Flex>
-          <Textarea
-            name="commentContent"
-            placeholder={"댓글을 입력해주세요."}
-            value={commentData && commentData.commentContent}
-            onChange={handleInputChange}
-          />
-          <IconButton
-            icon={<ArrowUpIcon />}
-            type={"submit"}
-            onClick={handleCommentSubmit}
-            aria-label={"commentSubmit"}
-          />
-        </Flex>
-      </VStack>
+    <VStack spacing={6} width="100%">
+      <CommentList />
     </VStack>
   );
 }

@@ -1,46 +1,58 @@
-import React from 'react';
-import {Flex, Box, TabPanel, Tab, TabPanels, TabList, Tabs,
+import {
+    Tab,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Tabs
 } from '@chakra-ui/react';
-import SubTemplate from "../Templates/SubTemplate";
-import {WriteForm} from "../Articles/UploadForm/WriteForm";
-import {ImageForm} from "../Articles/UploadForm/ImageForm";
+import React from 'react';
+import { FileForm } from "../Articles/UploadForm/FileForm";
 import MarkdownForm from "../Articles/UploadForm/MarkdownForm";
-import {FileForm} from "../Articles/UploadForm/FileForm";
+import SubTemplate from "../Templates/SubTemplate";
+
 function UploadForm() {
-
-        return (
-            <SubTemplate titleQuery={"uploadform"} pageTitle={"uploadform"}>
-                <Tabs variant='soft-rounded' colorScheme='yellow'>
-                    <TabList>
-                        <Tab>글</Tab>
-                        <Tab>그림</Tab>
-                        <Tab>Markdown</Tab>
-                        <Tab>File</Tab>
-                    </TabList>
-                    <TabPanels>
-                        <TabPanel>
-                            <WriteForm tag={1}/>
-                        </TabPanel>
-                        <TabPanel>
-                            <ImageForm tag={2} />
-                        </TabPanel>
-                        <TabPanel>
-                            <MarkdownForm tag={3} />
-                        </TabPanel>
-                        <TabPanel>
-                            <FileForm tag={4} />
-                        </TabPanel>
-                    </TabPanels>
-                </Tabs>
-            </SubTemplate>
-        );
+    return (
+        <Tabs variant='soft-rounded' colorScheme='gray'>
+            <TabList bg="#F9FAFB" borderRadius="md" p={1}>
+                <Tab
+                    _selected={{
+                        bg: '#6B7280',
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }}
+                    color="#6B7280"
+                >
+                    .md
+                </Tab>
+                <Tab
+                    _selected={{
+                        bg: '#6B7280',
+                        color: 'white',
+                        fontWeight: 'bold'
+                    }}
+                    color="#6B7280"
+                >
+                    Files
+                </Tab>
+            </TabList>
+            <TabPanels>
+                <TabPanel>
+                    <MarkdownForm redirectTo="/admin" />
+                </TabPanel>
+                <TabPanel>
+                    <FileForm redirectTo="/admin" />
+                </TabPanel>
+            </TabPanels>
+        </Tabs>
+    );
 }
 
-const UploadPostPage = () => {
-    return(<Flex justify={'center'}>
-        <Box>
+function UploadPostPage() {
+    return (
+        <SubTemplate pageTitle="게시글 작성" titleQuery="작성">
             <UploadForm />
-        </Box>
-    </Flex>);
+        </SubTemplate>
+    );
 }
+
 export default UploadPostPage;

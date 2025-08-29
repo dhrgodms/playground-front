@@ -1,3 +1,4 @@
+import { HamburgerIcon } from "@chakra-ui/icons";
 import {
     Button,
     Drawer,
@@ -12,46 +13,58 @@ import {
     IconButton,
     useDisclosure,
 } from "@chakra-ui/react";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { HamburgerIcon } from "@chakra-ui/icons";
-import axios from "axios";
-import serverUrl from "../Constants/Constants";
+import { serverUrlV2 } from "../Constants/Constants";
 
 export const Slider = () => {
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const btnRef = React.useRef();
+    console.log("sslider 실행");
+
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        axios.get(`${serverUrlV2}/categories`)
+            .then(res => {
+                setCategories(res.data);
+                console.log(res.data);
+                console.log(categories);
+            })
+            .catch(err => console.error("카테고리 불러오기 실패", err));
+    }, []);
 
     const [mainPostsdata, setMainPostsdata] = useState([]);
 
-    const [isLoaded, setIsLoaded] = useState(false);
-    // useEffect(() => {
-    //     axios
-    //         .get(`${serverUrl}:8080/api/post/main-posts`)
-    //         .then((response) => {
-    //             setMainPostsdata(response.data);
-    //             setIsLoaded(true);
-    //         })
-    //         .catch((error) => console.log(error));
-    // }, []); // slider에도 반영해주어야함
-
     return (
         <>
-            <Flex m={"5"} width={"full"} justify={"space-between"}>
+            <Flex
+                width={"100%"}
+                justify={"space-between"}
+                p={4}
+                borderRadius="md"
+            >
                 <Flex gap={"4"}>
                     <IconButton
                         ref={btnRef}
                         icon={<HamburgerIcon />}
-                        colorScheme="green"
+                        colorScheme="yellow"
+                        bg="#F7DC6F"
+                        color="#4A5568"
                         onClick={onOpen}
                         aria-label={"hambuger"}
+                        _hover={{ bg: '#F4D03F' }}
                     />
                 </Flex>
                 <Button
                     ref={btnRef}
                     colorScheme="yellow"
-                    onClick={() => navigate("/upload")}
+                    bg="#F7DC6F"
+                    color="#4A5568"
+                    onClick={() => navigate("/admin/upload")}
+                    _hover={{ bg: '#F4D03F', transform: 'scale(1.05)' }}
                 >
                     UPLOAD
                 </Button>
@@ -62,93 +75,87 @@ export const Slider = () => {
                 onClose={onClose}
                 finalFocusRef={btnRef}
             >
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader>
-                        <Heading size={"lg"} mb={3}>🆗 Haeeun.zip
+                <DrawerOverlay bg="rgba(44, 62, 80, 0.3)" />
+                <DrawerContent bg="white" borderRight="2px solid" borderColor="#2C3E50">
+                    <DrawerCloseButton color="#2C3E50" />
+                    <DrawerHeader bg="#F8F9FA" borderBottom="2px solid" borderColor="#2C3E50">
+                        <Heading size={"lg"} mb={3} color="#2C3E50" fontFamily="monospace">🆗 Haeeun.zip
                         </Heading>
                     </DrawerHeader>
 
-                    <DrawerBody>
+                    <DrawerBody bg="white">
                         <Flex direction={"column"} gap={"1.5em"}>
                             <Button
                                 ref={btnRef}
-                                colorScheme="teal"
+                                colorScheme="yellow"
                                 variant={"ghost"}
+                                bg="#F7DC6F"
+                                color="#2C3E50"
                                 onClick={() => navigate("/")}
+                                _hover={{ bg: '#F4D03F' }}
                             >
                                 메인으로
                             </Button>
                             <Button
                                 ref={btnRef}
-                                colorScheme="teal"
+                                colorScheme="yellow"
                                 variant={"ghost"}
+                                bg="#F7DC6F"
+                                color="#2C3E50"
                                 onClick={() => navigate(`/all`)}
+                                _hover={{ bg: '#F4D03F' }}
                             >
                                 모둠글
                             </Button>
+                            {/* 카테고리별 버튼 동적 렌더링 */}
+                            {categories.map((category) => (
+                                <Button
+                                    key={category.id}
+                                    ref={btnRef}
+                                    colorScheme="yellow"
+                                    variant={"ghost"}
+                                    bg="#F7DC6F"
+                                    color="#2C3E50"
+                                    onClick={() => navigate(`/category/${category.id}`)}
+                                    _hover={{ bg: '#F4D03F' }}
+                                >
+                                    {category.categoryName}
+                                </Button>
+                            ))}
                             <Button
                                 ref={btnRef}
-                                colorScheme="red"
+                                colorScheme="gray"
                                 variant={"ghost"}
-                                onClick={() => navigate(`/post/${mainPostsdata[0]?.id}`)}
-                            >
-                                인기글
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="teal"
-                                variant={"ghost"}
-                                onClick={() => navigate(`/post/${mainPostsdata[1]?.id}`)}
-                            >
-                                최신글
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="green"
-                                variant={"ghost"}
-                                onClick={() => navigate(`/writes`)}
-                            >
-                                생각글
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="green"
-                                variant={"ghost"}
-                                onClick={() => navigate(`/toons`)}
-                            >
-                                일상만화
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="green"
-                                variant={"ghost"}
-                                onClick={() => navigate(`/lists`)}
-                            >
-                                내가 듣는 플레이리스트(Playlist)
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="green"
-                                variant={"ghost"}
-                                onClick={() => navigate(`/files`)}
-                            >
-                                uploaded files
-                            </Button>
-                            <Button
-                                ref={btnRef}
-                                colorScheme="pink"
-                                variant={"ghost"}
+                                bg="#6B7280"
+                                color="white"
                                 onClick={() => navigate("/guestbook")}
+                                _hover={{ bg: '#4B5563' }}
                             >
                                 어서오세요 방명록
+                            </Button>
+                            <Button
+                                ref={btnRef}
+                                colorScheme="gray"
+                                variant={"ghost"}
+                                bg="#6B7280"
+                                color="white"
+                                onClick={() => navigate("/admin")}
+                                _hover={{ bg: '#4B5563' }}
+                            >
+                                🔧 어드민
                             </Button>
                         </Flex>
                     </DrawerBody>
 
-                    <DrawerFooter>
-                        <Button variant="outline" mr={3} onClick={onClose}>
+                    <DrawerFooter bg="#F8F9FA" borderTop="2px solid" borderColor="#2C3E50">
+                        <Button
+                            variant="outline"
+                            mr={3}
+                            onClick={onClose}
+                            color="#2C3E50"
+                            borderColor="#2C3E50"
+                            _hover={{ bg: '#2C3E50', color: 'white' }}
+                        >
                             close
                         </Button>
                     </DrawerFooter>

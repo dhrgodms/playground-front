@@ -1,31 +1,30 @@
-import React, { useEffect, useState } from "react";
+import { ChatIcon, DownloadIcon, ExternalLinkIcon, ViewIcon } from "@chakra-ui/icons";
 import {
+  Box,
   Button,
   Card,
   CardBody,
   Flex,
   HStack,
-  IconButton,
   Image,
+  Link,
   Skeleton,
   Tag,
   TagLabel,
   TagLeftIcon,
-  useToast,
-  VStack,
   Text,
-  Link,
-  Box,
+  useToast,
+  VStack
 } from "@chakra-ui/react";
-import axios from "axios";
-import SubTemplate from "../../Templates/SubTemplate";
-import ScrollToTop from "../../Atoms/ScrollToTop";
-import { ChatIcon, EditIcon, ViewIcon, DownloadIcon, ExternalLinkIcon } from "@chakra-ui/icons";
-import { useNavigate, useParams } from "react-router-dom";
-import { AiFillHeart } from "react-icons/ai";
 import MDEditor from "@uiw/react-md-editor";
-import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { AiFillHeart } from "react-icons/ai";
+import { useNavigate, useParams } from "react-router-dom";
+import ScrollToTop from "../../Atoms/ScrollToTop";
 import CommentContainer from "../../Components/Comments";
+import { serverUrl, serverUrlV2 } from "../../Constants/Constants";
+import SubTemplate from "../../Templates/SubTemplate";
 
 const DefaultPost = () => {
   const { id } = useParams();
@@ -47,8 +46,6 @@ const DefaultPost = () => {
   const navigate = useNavigate();
   const [images, setImages] = useState([]);
   const [files, setFiles] = useState([]);
-  const [markdown, setMarkdown] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   async function handleLikes(e) {
@@ -102,7 +99,7 @@ const DefaultPost = () => {
 
   // tag가 2(만화글)일 때 이미지 가져오기
   useEffect(() => {
-    if (writePost.tag === 2) {
+    if (writePost.categoryId === 2) {
       axios
         .get(`${serverUrl}:8080/api/image/all/${id}`)
         .then((response) => {
@@ -110,36 +107,7 @@ const DefaultPost = () => {
         })
         .catch((error) => console.log(error));
     }
-  }, [id, writePost.tag]);
-
-  // tag가 4(마크다운글)일 때 파일 및 마크다운 내용 가져오기
-  useEffect(() => {
-    if (writePost.tag === 4) {
-      const fetchData = async () => {
-        try {
-          const response = await axios.get(
-            `${serverUrl}:8080/api/files/all/${id}`
-          );
-          setFiles(response.data);
-
-          // 여러 파일이 있을 경우, 첫 번째 파일만 마크다운으로 표시 (필요시 로직 수정)
-          if (response.data.length > 0) {
-            const file = response.data[0];
-            const text = await fetch(`${serverUrl}${file.filePath}`).then((res) => res.text());
-            setMarkdown(text);
-          }
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setIsFetching(false);
-        }
-      };
-      if (!isFetching) {
-        setIsFetching(true);
-        fetchData();
-      }
-    }
-  }, [id, writePost.tag]);
+  }, [id, writePost.categoryId]);
 
   // 파일 확장자에 따라 아이콘과 표시 방식을 결정하는 함수
   const getFileDisplayInfo = (fileUrl) => {
@@ -147,6 +115,8 @@ const DefaultPost = () => {
 
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
       return { type: 'image', icon: null };
+    } else if (['md', 'markdown'].includes(extension)) {
+      return { type: 'markdown', icon: null };
     } else if (['pdf'].includes(extension)) {
       return { type: 'pdf', icon: <DownloadIcon /> };
     } else if (['doc', 'docx'].includes(extension)) {
@@ -159,131 +129,145 @@ const DefaultPost = () => {
   };
 
   return (
-    <Skeleton isLoaded={isLoaded} fadeDuration={1}>
+    <Skeleton
+      isLoaded={isLoaded}
+      fadeDuration={1}
+      startColor="#F8F9FA"
+      endColor="#E2E8F0"
+      borderRadius="lg"
+    >
       <SubTemplate
         pageTitle={writePost.contentTitle}
         titleQuery={writePost.contentTitle}
       >
-        <Flex justify={"flex-end"}>
-          <IconButton
-            icon={<EditIcon />}
-            aria-label="editPost"
-            onClick={() => navigate(`/post/update/${id}`)}
-          />
-        </Flex>
         <ScrollToTop />
-        <HStack justify={"space-between"}>
-          <Flex gap={3}>
-            <Tag size={"md"} key={1} variant="subtle" colorScheme="gray">
-              <TagLeftIcon boxsiz="12px" as={ViewIcon} />
-              <TagLabel>{writePost.views}</TagLabel>
-            </Tag>
-            <Tag size={"md"} key={2} variant="subtle" colorScheme="cyan">
-              <TagLeftIcon boxsiz="12px" as={ChatIcon} />
-              <TagLabel>{commentAll.length}</TagLabel>
-            </Tag>
-            <Tag size={"md"} key={3} variant="subtle" colorScheme="pink">
-              <TagLeftIcon boxsiz="12px" as={AiFillHeart} />
-              <TagLabel>{writePost.likes}</TagLabel>
-            </Tag>
-          </Flex>
-          <Flex justify={"flex-end"}>
-            <Button
-              type={"submit"}
-              onClick={handleLikes}
-              aria-label={"likes"}
-              colorScheme={"pink"}
-            >
-              <AiFillHeart />
-            </Button>
-          </Flex>
-        </HStack>
-        <Card>
-          <CardBody>
-            {writePost.tag === 4 ? (
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="lg"
+          borderWidth="1px"
+          borderColor="#E2E8F0"
+          color="#4A5568"
+          boxShadow="sm"
+          position="relative"
+          _before={{
+            content: '""',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            right: '0',
+            height: '3px',
+            bg: '#2C3E50',
+            borderRadius: 'lg lg 0 0'
+          }}
+        >
+          <HStack justify={"space-between"} mb={4}>
+            <Flex gap={2}>
+              <Tag size={"lg"} colorScheme={"pink"} variant={"solid"} bg="#E74C3C">
+                <TagLeftIcon as={ViewIcon} />
+                <TagLabel>{writePost.views}</TagLabel>
+              </Tag>
+              <Tag size={"lg"} colorScheme={"blue"} variant={"solid"} bg="#2C3E50">
+                <TagLeftIcon as={ChatIcon} />
+                <TagLabel>{commentAll.length}</TagLabel>
+              </Tag>
+              <Tag size={"lg"} colorScheme={"red"} variant={"solid"} bg="#E74C3C">
+                <TagLeftIcon as={AiFillHeart} />
+                <TagLabel>{writePost.likes}</TagLabel>
+              </Tag>
+            </Flex>
+            <Flex justify={"flex-end"}>
+              <Button
+                type={"submit"}
+                onClick={handleLikes}
+                aria-label={"likes"}
+                colorScheme={"pink"}
+                bg="#E74C3C"
+                color="white"
+                _hover={{ bg: '#C0392B' }}
+              >
+                <AiFillHeart />
+              </Button>
+            </Flex>
+          </HStack>
+          <Card bg="white" border="1px solid" borderColor="#E2E8F0" shadow="sm">
+            <CardBody>
+              {/* 모든 content를 마크다운으로 렌더링 */}
               <MDEditor.Markdown
-                source={markdown}
+                source={writePost.content}
                 style={{
                   whiteSpace: "pre-wrap",
                   backgroundColor: "white",
-                  color: "black",
+                  color: "#4A5568",
                 }}
               />
-            ) : (
-              <div
-                style={{
-                  whiteSpace: "pre-wrap",
-                  backgroundColor: "white",
-                  color: "black",
-                }}
-              >
-                {writePost.content}
-              </div>
-            )}
 
-            {/* 기존 이미지들 표시 */}
-            {images.map((image, index) => (
-              <Image key={index} src={image.url} alt={image.id} />
-            ))}
+              {/* 기존 이미지들 표시 */}
+              {images.map((image, index) => (
+                <Image key={index} src={image.url} alt={image.id} />
+              ))}
 
-            {/* 새로운 파일 URL들 표시 */}
-            {writePost.fileUrls && writePost.fileUrls.length > 0 && (
-              <Box mt={4}>
-                <Text fontSize="lg" fontWeight="bold" mb={3}>
-                  첨부 파일
-                </Text>
-                <VStack spacing={2} align="stretch">
-                  {writePost.fileUrls.map((fileUrl, index) => {
-                    const fileInfo = getFileDisplayInfo(fileUrl);
-                    const fileName = fileUrl.split('/').pop();
+              {/* 첨부 파일들 표시 */}
+              {writePost.fileUrls && writePost.fileUrls.length > 0 && (
+                <Box mt={4}>
+                  <Text fontSize="lg" fontWeight="bold" mb={3} color="#4A5568">
+                    첨부 파일
+                  </Text>
+                  <VStack spacing={2} align="stretch">
+                    {writePost.fileUrls.map((fileUrl, index) => {
+                      const fileInfo = getFileDisplayInfo(fileUrl);
+                      const fileName = fileUrl.split('/').pop();
 
-                    return (
-                      <Box key={index} p={3} border="1px" borderColor="gray.200" borderRadius="md">
-                        {fileInfo.type === 'image' ? (
-                          <VStack spacing={2}>
-                            <Text fontWeight="medium">{fileName}</Text>
-                            <Image
-                              src={fileUrl}
-                              alt={fileName}
-                              maxH="400px"
-                              objectFit="contain"
-                              borderRadius="md"
-                            />
-                            <Link href={fileUrl} isExternal color="blue.500">
+                      return (
+                        <Box key={index} p={3} border="1px" borderColor="#E2E8F0" borderRadius="md" bg="#F8F9FA">
+                          {fileInfo.type === 'image' ? (
+                            <VStack spacing={2}>
+                              <Text fontWeight="medium" color="#4A5568">{fileName}</Text>
+                              <Image
+                                src={fileUrl}
+                                alt={fileName}
+                                maxH="400px"
+                                objectFit="contain"
+                                borderRadius="md"
+                              />
+                              <Link href={fileUrl} isExternal color="#2C3E50">
+                                <HStack>
+                                  <ExternalLinkIcon />
+                                  <Text>원본 보기</Text>
+                                </HStack>
+                              </Link>
+                            </VStack>
+                          ) : (
+                            <HStack justify="space-between">
                               <HStack>
-                                <ExternalLinkIcon />
-                                <Text>원본 보기</Text>
+                                {fileInfo.icon}
+                                <Text fontWeight="medium" color="#4A5568">{fileName}</Text>
                               </HStack>
-                            </Link>
-                          </VStack>
-                        ) : (
-                          <HStack justify="space-between">
-                            <HStack>
-                              {fileInfo.icon}
-                              <Text fontWeight="medium">{fileName}</Text>
+                              <Link href={fileUrl} isExternal color="#2C3E50">
+                                <HStack>
+                                  <DownloadIcon />
+                                  <Text>다운로드</Text>
+                                </HStack>
+                              </Link>
                             </HStack>
-                            <Link href={fileUrl} isExternal color="blue.500">
-                              <HStack>
-                                <DownloadIcon />
-                                <Text>다운로드</Text>
-                              </HStack>
-                            </Link>
-                          </HStack>
-                        )}
-                      </Box>
-                    );
-                  })}
-                </VStack>
-              </Box>
-            )}
-          </CardBody>
-        </Card>
-        <CommentContainer
-          id={id}
-          commentAll={commentAll}
-          setCommentAll={setCommentAll}
-          writePost={writePost}
-        />
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </VStack>
+                </Box>
+              )}
+            </CardBody>
+          </Card>
+        </Box>
+        <Box mt={8}>
+          <CommentContainer
+            id={id}
+            commentAll={commentAll}
+            setCommentAll={setCommentAll}
+            writePost={writePost}
+          />
+        </Box>
       </SubTemplate>
     </Skeleton>
   );

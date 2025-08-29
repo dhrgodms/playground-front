@@ -1,18 +1,19 @@
+import { ChakraProvider } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import { ChakraProvider } from '@chakra-ui/react';
-import MainPage from './Pages/MainPage';
-import DefaultPost from './Articles/Post/DefaultPost';
-import MarkdownPostLists from './Articles/Post/MarkdownPostLists';
-import GuestBook from './Articles/Post/GuestBook';
-import WritePostsList from './Articles/Post/WritePostsList';
-import ImagesPostsLists from './Articles/Post/ImagesPostsLists';
-import LoginPage from "./Pages/LoginPage";
-import UploadPostPage from "./Pages/UploadPostPage";
-import UpdatePostPage from "./Pages/UpdatePostPage";
 import AllPostsList from "./Articles/Post/AllPostsList";
-import SignUpPage from "./Pages/SignUpPage";
+import DefaultPost from './Articles/Post/DefaultPost';
 import FilePostsList from "./Articles/Post/FilePostsList";
+import GuestBook from './Articles/Post/GuestBook';
+import ImagesPostsLists from './Articles/Post/ImagesPostsLists';
+import MarkdownPostLists from './Articles/Post/MarkdownPostLists';
+import WritePostsList from './Articles/Post/WritePostsList';
+import AdminPage from "./Pages/AdminPage";
+import LoginPage from "./Pages/LoginPage";
+import MainPage from './Pages/MainPage';
+import SignUpPage from "./Pages/SignUpPage";
+import UpdatePostPage from "./Pages/UpdatePostPage";
+import UploadPostPage from "./Pages/UploadPostPage";
 
 function App() {
 
@@ -21,9 +22,9 @@ function App() {
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/post/:id" element={<DefaultPost />} />
-                <Route path="/upload" element={<UploadPostPage />} />
-                <Route path="/post/update/:id" element={<UpdatePostPage />} />
-                <Route path="/admin" element={<adminDefaultPost />} />
+                <Route path="/admin/upload" element={<UploadPostPage />} />
+                <Route path="/admin/update/:id" element={<UpdatePostPage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="/writes" element={<WritePostsList />} />
                 <Route path="/toons" element={<ImagesPostsLists />} />
                 <Route path="/lists" element={<MarkdownPostLists />} />
@@ -32,6 +33,7 @@ function App() {
                 <Route path="/guestbook" element={<GuestBook />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/category/:categoryId" element={<MarkdownPostLists />} />
 
 
             </Routes>

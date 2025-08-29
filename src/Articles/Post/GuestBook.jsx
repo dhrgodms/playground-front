@@ -1,30 +1,26 @@
-import React, { useEffect, useState } from "react";
+import { ArrowUpIcon } from "@chakra-ui/icons";
 import {
-  Card,
-  CardBody,
+  Badge,
+  Box,
+  Button,
   Flex,
   Heading,
-  IconButton,
+  HStack,
   Input,
-  Stack,
-  StackDivider,
+  Skeleton,
   Text,
   Textarea,
   useToast,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import axios from "axios";
-import { ArrowUpIcon } from "@chakra-ui/icons";
-import SubTemplate from "../../Templates/SubTemplate";
+import React, { useEffect, useState } from "react";
 import serverUrl from "../../Constants/Constants";
+import SubTemplate from "../../Templates/SubTemplate";
 
-/**
- * TODO: 비밀번호 검증
- * TODO: 수정/삭제 가능하도록
- * @returns
- */
 const GuestBook = () => {
-  const [guestbook, setguestbook] = useState([]);
+  const [guestbook, setGuestbook] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [guestbookData, setGuestbookData] = useState({
     commentContent: "",
     commentNickname: "",
@@ -33,12 +29,14 @@ const GuestBook = () => {
   const toast = useToast();
 
   useEffect(() => {
-    guestbook?.length < 2 &&
-      axios
-        .get(`${serverUrl}:8080/api/guestbook/all`)
-        .then((response) => setguestbook(response.data))
-        .catch((error) => console.log(error));
-  });
+    axios
+      .get(`http://localhost:8080/api/guestbook/all`)
+      .then((response) => {
+        setGuestbook(response.data);
+        setIsLoaded(true);
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   function handleInputChange(event) {
     const { name, value } = event.target;
@@ -47,9 +45,19 @@ const GuestBook = () => {
 
   async function handleCommentSubmit(e) {
     e.preventDefault();
+
+    if (!guestbookData.commentNickname || !guestbookData.commentPassword || !guestbookData.commentContent) {
+      toast({
+        title: "모든 필드를 입력해주세요",
+        status: "warning",
+        isClosable: true,
+      });
+      return;
+    }
+
     try {
       axios
-        .post(`${serverUrl}:8080/api/guestbook/add`, {
+        .post(`${serverUrl}/api/guestbook/add`, {
           memberName: guestbookData.commentNickname,
           memberPassword: guestbookData.commentPassword,
           content: guestbookData.commentContent,
@@ -60,16 +68,16 @@ const GuestBook = () => {
             commentNickname: "",
             commentPassword: "",
           });
-          setguestbook([...guestbook, res.data]);
+          setGuestbook([...guestbook, res.data]);
           if (res?.data) {
             toast({
-              title: `방명록 업로드 완료.`,
+              title: `방명록이 등록되었습니다! 📮`,
               status: "success",
               isClosable: true,
             });
           } else {
             toast({
-              title: `잉ㅠ실패`,
+              title: `방명록 등록에 실패했습니다`,
               status: "error",
               isClosable: true,
             });
@@ -77,126 +85,169 @@ const GuestBook = () => {
         });
     } catch (e) {
       console.error(e);
+      toast({
+        title: "방명록 등록에 실패했습니다",
+        status: "error",
+        isClosable: true,
+      });
     }
   }
 
-  //   async function handleModify(e) {
-  //     e.preventDefault();
-  //     try {
-  //       axios
-  //         .post(`${serverUrl}:8080/api/guestbook/modify/${id}`, {
-  //           memberName: guestbookData.commentNickname,
-  //           memberPassword: guestbookData.commentPassword,
-  //           content: guestbookData.commentContent,
-  //         })
-  //         .then((res) => {
-  //           console.log("res:", res);
-  //           setGuestbookData({
-  //             commentContent: "",
-  //             commentNickname: "",
-  //             commentPassword: "",
-  //           });
-  //           setguestbook([...guestbook, res.data]);
-  //           if (res?.data) {
-  //             toast({
-  //               title: `방명록 업로드 완료.`,
-  //               status: "success",
-  //               isClosable: true,
-  //             });
-  //           } else {
-  //             toast({
-  //               title: `잉ㅠ실패`,
-  //               status: "error",
-  //               isClosable: true,
-  //             });
-  //           }
-  //         });
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   }
 
-  const CommentList = () => {
-    return guestbook?.map((comment, index) => (
-      <Card key={comment.id}>
-        <CardBody>
-          <Heading size={"xs"}>{comment.memberName}</Heading>
-          <Stack divider={<StackDivider />} spacing="2">
-            <Flex direction={"column"} key={index}>
-              <Text pt="1" fontSize="md">
-                {comment.content}
-              </Text>
+  const CommentList = () => (
+    <Box
+      bg="white"
+      p={6}
+      borderRadius="lg"
+      border="1px solid"
+      borderColor="#E2E8F0"
+      color="#4A5568"
+      boxShadow="sm"
+      position="relative"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        right: '0',
+        height: '3px',
+        bg: '#2C3E50',
+        borderRadius: 'lg lg 0 0'
+      }}
+    >
+      <Heading size="md" mb={4} color="#2C3E50" fontFamily="monospace">
+        💬 방명록 ({guestbook?.length || 0}개)
+      </Heading>
+      <VStack spacing={4} maxH="400px" overflowY="auto">
+        {guestbook?.map((comment, index) => (
+          <Box
+            key={comment.id}
+            p={4}
+            border="1px solid"
+            borderColor="#E2E8F0"
+            borderRadius="md"
+            bg="#F8F9FA"
+            width="100%"
+          >
+            <Flex justify="space-between" align="center" mb={2}>
+              <HStack spacing={3}>
+                <Text fontSize="lg">👤</Text>
+                <Heading size="sm" color="#2C3E50" fontFamily="monospace">
+                  {comment.memberName}
+                </Heading>
+              </HStack>
+              <Badge colorScheme="green" variant="subtle" fontSize="xs">
+                #{index + 1}
+              </Badge>
             </Flex>
-          </Stack>
-        </CardBody>
-      </Card>
-    ));
-  };
+            <Text fontSize="sm" color="#4A5568" whiteSpace="pre-wrap" mt={2}>
+              {comment.content}
+            </Text>
+          </Box>
+        ))}
+        {(!guestbook || guestbook.length === 0) && (
+          <Text fontSize="sm" color="#718096" textAlign="center" py={8}>
+            첫 번째 방명록을 남겨보세요! 💭
+          </Text>
+        )}
+      </VStack>
+    </Box>
+  );
 
-  //   function EditableControls({ isEditing, onSubmit, onCancel, onEdit }) {
-  //     return isEditing ? (
-  //       <ButtonGroup justifyContent="center" size="sm">
-  //         <IconButton
-  //           icon={<CheckIcon />}
-  //           onClick={onSubmit}
-  //           aria-label={"submit"}
-  //         />
-  //         <IconButton
-  //           icon={<CloseIcon />}
-  //           onClick={onCancel}
-  //           aria-label={"close"}
-  //         />
-  //       </ButtonGroup>
-  //     ) : (
-  //       <Flex justifyContent="center">
-  //         <IconButton
-  //           size="sm"
-  //           icon={<EditIcon />}
-  //           onClick={onEdit}
-  //           aria-label={"edit"}
-  //         />
-  //       </Flex>
-  //     );
-  //   }
+  const CommentForm = () => (
+    <Box
+      bg="white"
+      p={6}
+      borderRadius="lg"
+      border="1px solid"
+      borderColor="#E2E8F0"
+      color="#4A5568"
+      boxShadow="sm"
+      position="relative"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        right: '0',
+        height: '3px',
+        bg: '#2C3E50',
+        borderRadius: 'lg lg 0 0'
+      }}
+    >
+      <Heading size="md" mb={4} color="#2C3E50" fontFamily="monospace">
+        ✍️ 방명록 작성
+      </Heading>
+      <VStack spacing={4}>
+        <Flex gap={3} width="100%">
+          <Input
+            name="commentNickname"
+            placeholder="귀여운 닉네임"
+            value={guestbookData && guestbookData.commentNickname}
+            onChange={handleInputChange}
+            borderColor="#E2E8F0"
+            _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+            color="#4A5568"
+            size="sm"
+          />
+          <Input
+            name="commentPassword"
+            type="password"
+            placeholder="비밀번호"
+            value={guestbookData && guestbookData.commentPassword}
+            onChange={handleInputChange}
+            borderColor="#E2E8F0"
+            _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+            color="#4A5568"
+            size="sm"
+          />
+        </Flex>
+        <Flex gap={3} width="100%">
+          <Textarea
+            name="commentContent"
+            placeholder="방명록을 입력해주세요..."
+            value={guestbookData && guestbookData.commentContent}
+            onChange={handleInputChange}
+            borderColor="#E2E8F0"
+            _focus={{ borderColor: '#F7DC6F', boxShadow: '0 0 0 1px #F7DC6F' }}
+            color="#4A5568"
+            resize="vertical"
+            minH="100px"
+            maxH="200px"
+            size="sm"
+          />
+          <Button
+            onClick={handleCommentSubmit}
+            colorScheme="yellow"
+            bg="#F7DC6F"
+            color="#4A5568"
+            _hover={{ bg: '#F4D03F' }}
+            px={4}
+            height="auto"
+            alignSelf="flex-end"
+            size="sm"
+          >
+            <ArrowUpIcon />
+          </Button>
+        </Flex>
+      </VStack>
+    </Box>
+  );
 
   return (
-    <SubTemplate pageTitle={"~방명록~"} titleQuery={"방명록"}>
-      <Flex height={"100vh"} style={{ flexDirection: "column" }}>
-        <VStack height={"100vh"} style={{ flexDirection: "column" }}>
-          <VStack width={"75vw"} p={"5"} alignItems={"stretch"}>
-            <CommentList />
-
-            <Flex>
-              <Input
-                name="commentNickname"
-                placeholder={"귀여운 닉네임"}
-                value={guestbookData && guestbookData.commentNickname}
-                onChange={handleInputChange}
-              />
-              <Input
-                name="commentPassword"
-                placeholder={"비밀번호 486"}
-                value={guestbookData && guestbookData.commentPassword}
-                onChange={handleInputChange}
-              />
-            </Flex>
-            <Flex>
-              <Textarea
-                name="commentContent"
-                placeholder={"내용을 입력해주세요."}
-                value={guestbookData && guestbookData.commentContent}
-                onChange={handleInputChange}
-              />
-              <IconButton
-                icon={<ArrowUpIcon />}
-                type={"submit"}
-                onClick={handleCommentSubmit}
-                aria-label={"commentSubmit"}
-              />
-            </Flex>
-          </VStack>
+    <SubTemplate pageTitle={"방명록"} titleQuery={"방명록"}>
+      <Skeleton
+        isLoaded={isLoaded}
+        fadeDuration={1}
+        startColor="#F8F9FA"
+        endColor="#E2E8F0"
+        borderRadius="lg"
+      >
+        <VStack spacing={8} align="stretch">
+          <CommentList />
+          <CommentForm />
         </VStack>
-      </Flex>
+      </Skeleton>
     </SubTemplate>
   );
 };
