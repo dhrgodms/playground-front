@@ -84,42 +84,6 @@ src/
     └── SubTemplate.jsx
 ```
 
-## 설치 및 실행
-
-### 1. 저장소 클론
-```bash
-git clone [repository-url]
-cd my-app
-```
-
-### 2. 의존성 설치
-```bash
-npm install
-```
-
-### 3. 환경 변수 설정
-`.env` 파일을 생성하고 다음 내용을 추가하세요:
-```env
-REACT_APP_SERVER_URL=http://localhost
-```
-
-### 4. 개발 서버 실행
-```bash
-npm start
-```
-
-### 5. 프로덕션 빌드
-```bash
-npm run build
-```
-
-### 사용 가능한 스크립트
-
-- `npm start` - 개발 서버 실행 (포트 3000)
-- `npm run build` - 프로덕션용 빌드
-- `npm test` - 테스트 실행
-- `npm run eject` - Create React App 설정 추출
-
 ## API 엔드포인트
 
 프로젝트는 다음 API 엔드포인트를 사용합니다:
